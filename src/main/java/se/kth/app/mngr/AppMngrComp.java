@@ -19,8 +19,13 @@ package se.kth.app.mngr;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.kth.app.CORB.CORB;
+import se.kth.app.CORB.CORBPort;
+import se.kth.app.EagerRB.EagerRB;
+import se.kth.app.EagerRB.EagerRBPort;
 import se.kth.app.GBEB.GBEB;
 import se.kth.app.GBEB.GBEBPort;
+import se.kth.app.sim.BroadcastTest;
 import se.kth.croupier.util.NoView;
 import se.kth.app.AppComp;
 import se.sics.kompics.*;
@@ -50,7 +55,10 @@ public class AppMngrComp extends ComponentDefinition {
   private OverlayId croupierId;
   //***************************INTERNAL_STATE*********************************
   private Component appComp;
-  private Component GBEBComp;
+  private Component gbebComp;
+  private Component eagerRB;
+  private Component corb;
+  private Component broadcast;
   //******************************AUX_STATE***********************************
   private OMngrCroupier.ConnectRequest pendingCroupierConnReq;
   //**************************************************************************
@@ -83,6 +91,7 @@ public class AppMngrComp extends ComponentDefinition {
     public void handle(OMngrCroupier.ConnectResponse event) {
       LOG.info("{}overlays connected", logPrefix);
       connectAppComp();
+      connectBroadcastComponents();
       trigger(Start.event, appComp.control());
       trigger(new OverlayViewUpdate.Indication<>(croupierId, false, new NoView()), extPorts.viewUpdatePort);
     }
@@ -90,12 +99,30 @@ public class AppMngrComp extends ComponentDefinition {
 
   private void connectAppComp() {
     appComp = create(AppComp.class, new AppComp.Init(selfAdr, croupierId));
-    GBEBComp = create(GBEB.class, se.sics.kompics.Init.NONE);
+    broadcast = create(BroadcastTest.class, new BroadcastTest.Init(selfAdr));
 
-    connect(appComp.getPositive(GBEBPort.class), GBEBComp.getNegative(GBEBPort.class), Channel.TWO_WAY);
     connect(appComp.getNegative(Timer.class), extPorts.timerPort, Channel.TWO_WAY);
     connect(appComp.getNegative(Network.class), extPorts.networkPort, Channel.TWO_WAY);
     connect(appComp.getNegative(CroupierPort.class), extPorts.croupierPort, Channel.TWO_WAY);
+
+    connect(broadcast.getNegative(Network.class), extPorts.networkPort, Channel.TWO_WAY);
+    connect(broadcast.getNegative(Timer.class), extPorts.timerPort, Channel.TWO_WAY);
+  }
+
+  private void connectBroadcastComponents() {
+    gbebComp = create(GBEB.class, new GBEB.Init(selfAdr));
+    eagerRB = create(EagerRB.class, new EagerRB.Init(selfAdr));
+    corb = create(CORB.class, new CORB.Init(selfAdr));
+
+    connect(appComp.getNegative(CORBPort.class), corb.getPositive(CORBPort.class), Channel.TWO_WAY);
+    connect(corb.getNegative(EagerRBPort.class), eagerRB.getPositive(EagerRBPort.class), Channel.TWO_WAY);
+    connect(eagerRB.getNegative(GBEBPort.class), gbebComp.getPositive(GBEBPort.class), Channel.TWO_WAY);
+
+
+    connect(gbebComp.getNegative(Network.class), extPorts.networkPort, Channel.TWO_WAY);
+    connect(gbebComp.getNegative(CroupierPort.class), extPorts.croupierPort, Channel.TWO_WAY);
+
+
   }
 
   public static class Init extends se.sics.kompics.Init<AppMngrComp> {

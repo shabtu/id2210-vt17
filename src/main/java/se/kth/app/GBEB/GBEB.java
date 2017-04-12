@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import se.kth.app.EagerRB.EagerRB;
 import se.kth.app.EagerRB.EagerRBPort;
 import se.kth.app.test.Ping;
+import se.kth.app.test.Pong;
 import se.kth.croupier.util.CroupierHelper;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
@@ -92,7 +93,7 @@ public class GBEB extends ComponentDefinition {
         }
     };
 
-    ClassMatchedHandler historyRequest = new ClassMatchedHandler<HistoryRequest, KContentMsg>() {
+    ClassMatchedHandler historyRequest = new ClassMatchedHandler<HistoryRequest, KContentMsg<?, ?, HistoryRequest>>() {
 
         @Override
         public void handle(HistoryRequest historyRequest, KContentMsg kContentMsg) {
@@ -102,7 +103,7 @@ public class GBEB extends ComponentDefinition {
         }
     };
 
-    ClassMatchedHandler historyResponse = new ClassMatchedHandler<HistoryResponse, KContentMsg>() {
+    ClassMatchedHandler historyResponse = new ClassMatchedHandler<HistoryResponse, KContentMsg<?, ?, HistoryResponse>>() {
 
         @Override
         public void handle(HistoryResponse historyResponse, KContentMsg kContentMsg) {
@@ -115,8 +116,6 @@ public class GBEB extends ComponentDefinition {
             }
 
             pasts.addAll(unseen);
-
-
 
         }
     };
