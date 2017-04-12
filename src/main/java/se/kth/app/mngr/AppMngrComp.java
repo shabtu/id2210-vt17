@@ -19,15 +19,12 @@ package se.kth.app.mngr;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.kth.app.GBEB.GBEB;
+import se.kth.app.GBEB.GBEBPort;
+import se.kth.app.GBEB.InitGBEB;
 import se.kth.croupier.util.NoView;
 import se.kth.app.AppComp;
-import se.sics.kompics.Channel;
-import se.sics.kompics.Component;
-import se.sics.kompics.ComponentDefinition;
-import se.sics.kompics.Handler;
-import se.sics.kompics.Negative;
-import se.sics.kompics.Positive;
-import se.sics.kompics.Start;
+import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.timer.Timer;
 import se.sics.ktoolbox.croupier.CroupierPort;
@@ -54,6 +51,7 @@ public class AppMngrComp extends ComponentDefinition {
   private OverlayId croupierId;
   //***************************INTERNAL_STATE*********************************
   private Component appComp;
+  private Component GBEBComp;
   //******************************AUX_STATE***********************************
   private OMngrCroupier.ConnectRequest pendingCroupierConnReq;
   //**************************************************************************
@@ -77,6 +75,7 @@ public class AppMngrComp extends ComponentDefinition {
 
       pendingCroupierConnReq = new OMngrCroupier.ConnectRequest(croupierId, false);
       trigger(pendingCroupierConnReq, omngrPort);
+
     }
   };
 
@@ -92,6 +91,9 @@ public class AppMngrComp extends ComponentDefinition {
 
   private void connectAppComp() {
     appComp = create(AppComp.class, new AppComp.Init(selfAdr, croupierId));
+    GBEBComp = create(GBEB.class, se.sics.kompics.Init.NONE);
+
+    connect(appComp.getPositive(GBEBPort.class), GBEBComp.getNegative(GBEBPort.class), Channel.TWO_WAY);
     connect(appComp.getNegative(Timer.class), extPorts.timerPort, Channel.TWO_WAY);
     connect(appComp.getNegative(Network.class), extPorts.networkPort, Channel.TWO_WAY);
     connect(appComp.getNegative(CroupierPort.class), extPorts.croupierPort, Channel.TWO_WAY);

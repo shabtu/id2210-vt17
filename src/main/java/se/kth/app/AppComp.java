@@ -20,14 +20,12 @@ package se.kth.app;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.kth.app.GBEB.GBEBPort;
+import se.kth.app.GBEB.InitGBEB;
 import se.kth.croupier.util.CroupierHelper;
 import se.kth.app.test.Ping;
 import se.kth.app.test.Pong;
-import se.sics.kompics.ClassMatchedHandler;
-import se.sics.kompics.ComponentDefinition;
-import se.sics.kompics.Handler;
-import se.sics.kompics.Positive;
-import se.sics.kompics.Start;
+import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.network.Transport;
 import se.sics.kompics.timer.Timer;
@@ -52,6 +50,8 @@ public class AppComp extends ComponentDefinition {
   Positive<Timer> timerPort = requires(Timer.class);
   Positive<Network> networkPort = requires(Network.class);
   Positive<CroupierPort> croupierPort = requires(CroupierPort.class);
+  Negative<GBEBPort> gbebPort = provides(GBEBPort.class);
+
   //**************************************************************************
   private KAddress selfAdr;
 
