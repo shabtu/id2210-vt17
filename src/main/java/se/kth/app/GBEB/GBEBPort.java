@@ -8,8 +8,7 @@ import se.sics.kompics.PortType;
 public class GBEBPort extends PortType {
 
     {
-        indication(InitGBEB.class);
-        indication(BroadcastEvent.class);
+        request(BroadcastEvent.class);
         indication(DeliverEvent.class);
     }
 }

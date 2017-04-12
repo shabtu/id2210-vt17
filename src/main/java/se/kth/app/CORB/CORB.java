@@ -6,6 +6,7 @@ import se.kth.app.EagerRB.EagerRB;
 import se.kth.app.EagerRB.EagerRBPort;
 import se.kth.app.EagerRB.ReliableBroadcast;
 import se.kth.app.EagerRB.ReliableDeliver;
+import se.kth.app.GBEB.DeliverEvent;
 import se.kth.app.GBEB.GBEB;
 import se.kth.app.GBEB.GBEBPort;
 import se.sics.kompics.*;
@@ -30,25 +31,24 @@ public class CORB extends ComponentDefinition {
     Positive<Timer> timerPort = requires(Timer.class);
     Positive<Network> networkPort = requires(Network.class);
 
-    Positive<CORBPort> corbPort = requires(CORBPort.class);
+    Negative<CORBPort> corbPort = provides(CORBPort.class);
 
-    Negative<EagerRBPort> eagerRBPort = provides(EagerRBPort.class);
-
-
+    Positive<EagerRBPort> eagerRBPort = requires(EagerRBPort.class);
 
     //**************************************************************************
     private KAddress selfAdr;
 
     private Set delivered;
-    private List past;
+    private LinkedList past;
 
 
-    public CORB(EagerRB.Init init){
+    public CORB(Init init){
         selfAdr = init.selfAdr;
 
 
         subscribe(handler, control);
         subscribe(cBroadcastHandler, corbPort);
+        subscribe(reliableDeliverHandler, eagerRBPort);
 
     }
 
@@ -65,8 +65,8 @@ public class CORB extends ComponentDefinition {
     protected Handler<CBroadcast> cBroadcastHandler = new Handler<CBroadcast>() {
         @Override
         public void handle(CBroadcast cBroadcast) {
-            ReliableBroadcast reliableBroadcast = new ReliableBroadcast(cBroadcast.getEvent());
-            CORBDeliver corbDeliver = new CORBDeliver(selfAdr, cBroadcast.getEvent());
+            ReliableBroadcast reliableBroadcast = new ReliableBroadcast(past, cBroadcast);
+            CORBDeliver corbDeliver = new CORBDeliver(selfAdr, cBroadcast);
             trigger(reliableBroadcast, eagerRBPort);
             past.add(corbDeliver);
 
@@ -77,13 +77,32 @@ public class CORB extends ComponentDefinition {
         @Override
         public void handle(ReliableDeliver reliableDeliver) {
             if (!delivered.contains(reliableDeliver.getEvent())){
-                LinkedList<KompicsEvent> list = (LinkedList<KompicsEvent>) reliableDeliver.getEvent();
+                LinkedList<DeliverEvent> list = reliableDeliver.getList();
+                for (DeliverEvent deliverEvent : list){
+                    KompicsEvent event = deliverEvent.getEvent();
+                    if (!delivered.contains(event)){
+                        CORBDeliver corbDeliver = new CORBDeliver(deliverEvent.getkAddress(), deliverEvent.getEvent());
+                        trigger(corbDeliver, corbPort);
+                        delivered.add(event);
+                        if (!past.contains(deliverEvent)){
+                            past.add(deliverEvent);
+                        }
+                    }
+                }
+                CORBDeliver corbDeliver = new CORBDeliver(reliableDeliver.getkAddress(), reliableDeliver.getEvent());
+
+                trigger(corbDeliver, corbPort);
+                delivered.add(reliableDeliver.getEvent());
+
+                if (!past.contains(reliableDeliver)){
+                    past.add(reliableDeliver);
+                }
 
             }
         }
     };
 
-    public static class Init extends se.sics.kompics.Init<GBEB> {
+    public static class Init extends se.sics.kompics.Init<CORB> {
 
         public final KAddress selfAdr;
 

@@ -10,8 +10,8 @@ import se.sics.kompics.PortType;
 public class EagerRBPort extends PortType {
 
     {
-        indication(ReliableBroadcast.class);
-        request(ReliableDeliver.class);
+        request(ReliableBroadcast.class);
+        indication(ReliableDeliver.class);
     }
 
 }

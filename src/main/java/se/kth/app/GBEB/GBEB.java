@@ -3,6 +3,8 @@ package se.kth.app.GBEB;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.kth.app.EagerRB.EagerRB;
+import se.kth.app.EagerRB.EagerRBPort;
 import se.kth.app.test.Ping;
 import se.kth.croupier.util.CroupierHelper;
 import se.sics.kompics.*;
@@ -34,25 +36,22 @@ public class GBEB extends ComponentDefinition {
     Positive<Timer> timerPort = requires(Timer.class);
     Positive<Network> networkPort = requires(Network.class);
 
-    Positive<GBEBPort> GBEBPort = requires(GBEBPort.class);
+    Negative<GBEBPort> GBEBPort = provides(GBEBPort.class);
     Positive<CroupierPort> croupierPort = requires(CroupierPort.class);
 
 
     //**************************************************************************
     private KAddress selfAdr;
-    private KAddress bootstrapServer;
 
     private Set<DeliverEvent> pasts;
 
 
     public GBEB(Init init){
         selfAdr = init.selfAdr;
-        bootstrapServer = init.bootstrapServer;
 
         subscribe(handler, control);
-        subscribe(initGBEBHandler, GBEBPort);
         subscribe(broadcastEventHandler, GBEBPort);
-        subscribe(croupierSampleHandler, networkPort);
+        subscribe(croupierSampleHandler, croupierPort);
         subscribe(historyRequest, networkPort);
         subscribe(historyResponse, networkPort);
 
@@ -67,17 +66,10 @@ public class GBEB extends ComponentDefinition {
     };
 
 
-    protected Handler<InitGBEB> initGBEBHandler = new Handler<InitGBEB>() {
-        @Override
-        public void handle(InitGBEB initGBEB) {
-            LOG.info("SHIIIIIIIIIIET!");
-        }
-    };
-
     protected Handler<BroadcastEvent> broadcastEventHandler = new Handler<BroadcastEvent>() {
         @Override
         public void handle(BroadcastEvent broadcastEvent) {
-            DeliverEvent deliverEvent = new DeliverEvent(selfAdr, broadcastEvent.getEvent());
+            DeliverEvent deliverEvent = new DeliverEvent(selfAdr, broadcastEvent);
             pasts.add(deliverEvent);
         }
     };
@@ -118,8 +110,8 @@ public class GBEB extends ComponentDefinition {
 
             Set<DeliverEvent> unseen = Sets.symmetricDifference(pasts, response);
 
-            for (DeliverEvent past : unseen) {
-                trigger(past, GBEBPort);
+            for (DeliverEvent deliverEvent : unseen) {
+                trigger(deliverEvent, GBEBPort);
             }
 
             pasts.addAll(unseen);
@@ -132,11 +124,9 @@ public class GBEB extends ComponentDefinition {
     public static class Init extends se.sics.kompics.Init<GBEB> {
 
         public final KAddress selfAdr;
-        public final KAddress bootstrapServer;
 
-        public Init(KAddress selfAdr, KAddress bootstrapServer) {
+        public Init(KAddress selfAdr) {
             this.selfAdr = selfAdr;
-            this.bootstrapServer = bootstrapServer;
         }
     }
 

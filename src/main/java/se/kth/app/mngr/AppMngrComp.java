@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.kth.app.GBEB.GBEB;
 import se.kth.app.GBEB.GBEBPort;
-import se.kth.app.GBEB.InitGBEB;
 import se.kth.croupier.util.NoView;
 import se.kth.app.AppComp;
 import se.sics.kompics.*;

@@ -8,6 +8,7 @@ import se.sics.kompics.PortType;
 public class CORBPort extends PortType {
 
     {
-        indication(CBroadcast.class);
+        request(CBroadcast.class);
+        indication(CORBDeliver.class);
     }
 }

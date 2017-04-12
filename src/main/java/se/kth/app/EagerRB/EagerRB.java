@@ -27,9 +27,9 @@ public class EagerRB extends ComponentDefinition {
     Positive<Timer> timerPort = requires(Timer.class);
     Positive<Network> networkPort = requires(Network.class);
 
-    Positive<EagerRBPort> eagerPort = requires(EagerRBPort.class);
+    Negative<EagerRBPort> eagerPort = provides(EagerRBPort.class);
 
-    Negative<GBEBPort> gbebPort = provides(GBEBPort.class);
+    Positive<GBEBPort> gbebPort = requires(GBEBPort.class);
 
 
     //**************************************************************************
@@ -69,9 +69,12 @@ public class EagerRB extends ComponentDefinition {
             KompicsEvent event = deliverEvent.getEvent();
             if (!delivered.contains(event)){
                 delivered.add(event);
-                ReliableDeliver reliableDeliver = new ReliableDeliver(deliverEvent.getkAddress(), deliverEvent.getEvent());
+                ReliableBroadcast reliableBroadcast = (ReliableBroadcast) deliverEvent.getEvent();
+                ReliableDeliver reliableDeliver = new ReliableDeliver(deliverEvent.getkAddress(), deliverEvent.getEvent(), reliableBroadcast.getList());
+                BroadcastEvent broadcastEvent = new BroadcastEvent(deliverEvent);
+
                 trigger(reliableDeliver, eagerPort);
-                trigger(deliverEvent, gbebPort);
+                trigger(broadcastEvent, gbebPort);
 
             }
         }
@@ -80,7 +83,7 @@ public class EagerRB extends ComponentDefinition {
 
 
 
-    public static class Init extends se.sics.kompics.Init<GBEB> {
+    public static class Init extends se.sics.kompics.Init<EagerRB> {
 
         public final KAddress selfAdr;
 
