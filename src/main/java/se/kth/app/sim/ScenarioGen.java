@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import se.kth.sim.compatibility.SimNodeIdExtractor;
 import se.kth.system.HostMngrComp;
+import se.sics.kompics.ComponentDefinition;
+import se.sics.kompics.Init;
+import se.sics.kompics.KompicsEvent;
 import se.sics.kompics.network.Address;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.adaptor.Operation;
@@ -29,6 +32,7 @@ import se.sics.kompics.simulator.adaptor.distributions.extra.BasicIntSequentialD
 import se.sics.kompics.simulator.events.system.SetupEvent;
 import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.network.identifier.IdentifierExtractor;
+import se.sics.kompics.simulator.stochastic.events.StochasticKompicsSimulatorEvent;
 import se.sics.ktoolbox.omngr.bootstrap.BootstrapServerComp;
 import se.sics.ktoolbox.util.network.KAddress;
 
@@ -78,6 +82,38 @@ public class ScenarioGen {
         }
     };
 
+    static Operation1<StartNodeEvent, Integer> testOp = new Operation1<StartNodeEvent, Integer>() {
+        @Override
+        public StartNodeEvent generate(Integer integer) {
+            final KAddress selfAdr;
+            final KAddress target;
+
+            {
+                String selfIp = "193.0.0.1";
+                selfAdr = ScenarioSetup.getNodeAdr(selfIp,integer);
+
+                String targetIp = "193.0.0.2";
+                target = ScenarioSetup.getNodeAdr(targetIp, integer);
+            }
+            return new StartNodeEvent() {
+                @Override
+                public KAddress getNodeAddress() {
+                    return selfAdr;
+                }
+
+                @Override
+                public Class getComponentDefinition() {
+                    return TestComponent.class;
+                }
+
+                @Override
+                public TestComponent.Init getComponentInit() {
+                    return new TestComponent.Init(selfAdr, target);
+                }
+            };
+        }
+    };
+
     static Operation1<StartNodeEvent, Integer> startNodeOp = new Operation1<StartNodeEvent, Integer>() {
 
         @Override
@@ -88,6 +124,7 @@ public class ScenarioGen {
                 {
                     String nodeIp = "193.0.0." + nodeId;
                     selfAdr = ScenarioSetup.getNodeAdr(nodeIp, nodeId);
+
                 }
 
                 @Override
@@ -135,14 +172,24 @@ public class ScenarioGen {
                 StochasticProcess startPeers = new StochasticProcess() {
                     {
                         eventInterArrivalTime(uniform(1000, 1100));
-                        raise(100, startNodeOp, new BasicIntSequentialDistribution(1));
+                        raise(3, startNodeOp, new BasicIntSequentialDistribution(2));
+                    }
+                };
+
+                StochasticProcess startTest = new StochasticProcess() {
+                    {
+                        //eventInterArrivalTime(constant(1000));
+                        raise(1, testOp, new BasicIntSequentialDistribution(1));
                     }
                 };
 
                 systemSetup.start();
                 startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
                 startPeers.startAfterTerminationOf(1000, startBootstrapServer);
-                terminateAfterTerminationOf(1000*1000, startPeers);
+
+                startTest.startAfterTerminationOf(1000, startPeers);
+                terminateAfterTerminationOf(1000*1000, startTest);
+
             }
         };
 

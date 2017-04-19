@@ -21,20 +21,15 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.kth.app.CORB.CBroadcast;
+import se.kth.app.CORB.CORB;
 import se.kth.app.CORB.CORBDeliver;
 import se.kth.app.CORB.CORBPort;
-import se.kth.app.EagerRB.ReliableDeliver;
-import se.kth.app.GBEB.GBEBPort;
-import se.kth.app.sim.SimpleEvent;
-import se.kth.croupier.util.CroupierHelper;
-import se.kth.app.test.Ping;
-import se.kth.app.test.Pong;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
-import se.sics.kompics.network.Transport;
+
 import se.sics.kompics.timer.Timer;
 import se.sics.ktoolbox.croupier.CroupierPort;
-import se.sics.ktoolbox.croupier.event.CroupierSample;
+
 import se.sics.ktoolbox.util.identifiable.Identifier;
 import se.sics.ktoolbox.util.network.KAddress;
 import se.sics.ktoolbox.util.network.KContentMsg;
@@ -82,18 +77,17 @@ public class AppComp extends ComponentDefinition {
     @Override
     public void handle(CORBDeliver corbDeliver) {
 
-      SimpleEvent simpleEvent = (SimpleEvent) corbDeliver.getEvent();
+      //SimpleEvent simpleEvent = (SimpleEvent) corbDeliver.getEvent();
 
-      LOG.info("YEESSSSS got " + simpleEvent.getContent());
 
     }
   };
 
-  ClassMatchedHandler<SimpleEvent, KContentMsg<?, ?, SimpleEvent>> simpleEventHandler = new ClassMatchedHandler<SimpleEvent, KContentMsg<?, ?, SimpleEvent>>() {
+  ClassMatchedHandler<CBroadcast, KContentMsg<?, ?, CBroadcast>> simpleEventHandler = new ClassMatchedHandler<CBroadcast, KContentMsg<?, ?, CBroadcast>>() {
     @Override
-    public void handle(SimpleEvent simpleEvent, KContentMsg kContentMsg) {
+    public void handle(CBroadcast cBroadcast, KContentMsg kContentMsg) {
       LOG.info("SENDING SIMPLE");
-      CBroadcast cBroadcast = new CBroadcast(simpleEvent);
+
       trigger(cBroadcast, corbPortPositive);
     }
   };
@@ -102,6 +96,7 @@ public class AppComp extends ComponentDefinition {
 
     public final KAddress selfAdr;
     public final Identifier gradientOId;
+    public KAddress netAddress;
 
     public Init(KAddress selfAdr, Identifier gradientOId) {
       this.selfAdr = selfAdr;

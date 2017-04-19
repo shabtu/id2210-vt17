@@ -25,7 +25,6 @@ import se.kth.app.EagerRB.EagerRB;
 import se.kth.app.EagerRB.EagerRBPort;
 import se.kth.app.GBEB.GBEB;
 import se.kth.app.GBEB.GBEBPort;
-import se.kth.app.sim.BroadcastTest;
 import se.kth.croupier.util.NoView;
 import se.kth.app.AppComp;
 import se.sics.kompics.*;
@@ -99,14 +98,12 @@ public class AppMngrComp extends ComponentDefinition {
 
   private void connectAppComp() {
     appComp = create(AppComp.class, new AppComp.Init(selfAdr, croupierId));
-    broadcast = create(BroadcastTest.class, new BroadcastTest.Init(selfAdr));
+    //broadcast = create(BroadcastTest.class, new BroadcastTest.Init(selfAdr));
 
     connect(appComp.getNegative(Timer.class), extPorts.timerPort, Channel.TWO_WAY);
     connect(appComp.getNegative(Network.class), extPorts.networkPort, Channel.TWO_WAY);
     connect(appComp.getNegative(CroupierPort.class), extPorts.croupierPort, Channel.TWO_WAY);
 
-    connect(broadcast.getNegative(Network.class), extPorts.networkPort, Channel.TWO_WAY);
-    connect(broadcast.getNegative(Timer.class), extPorts.timerPort, Channel.TWO_WAY);
   }
 
   private void connectBroadcastComponents() {
