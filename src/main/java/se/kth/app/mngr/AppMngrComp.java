@@ -57,7 +57,6 @@ public class AppMngrComp extends ComponentDefinition {
   private Component gbebComp;
   private Component eagerRB;
   private Component corb;
-  private Component broadcast;
   //******************************AUX_STATE***********************************
   private OMngrCroupier.ConnectRequest pendingCroupierConnReq;
   //**************************************************************************
@@ -90,9 +89,18 @@ public class AppMngrComp extends ComponentDefinition {
     public void handle(OMngrCroupier.ConnectResponse event) {
       LOG.info("{}overlays connected", logPrefix);
       connectAppComp();
+
       connectBroadcastComponents();
+
+
+      trigger(Start.event, gbebComp.control());
+      trigger(Start.event, eagerRB.control());
+      trigger(Start.event, corb.control());
+
       trigger(Start.event, appComp.control());
       trigger(new OverlayViewUpdate.Indication<>(croupierId, false, new NoView()), extPorts.viewUpdatePort);
+
+
     }
   };
 
@@ -114,7 +122,6 @@ public class AppMngrComp extends ComponentDefinition {
     connect(appComp.getNegative(CORBPort.class), corb.getPositive(CORBPort.class), Channel.TWO_WAY);
     connect(corb.getNegative(EagerRBPort.class), eagerRB.getPositive(EagerRBPort.class), Channel.TWO_WAY);
     connect(eagerRB.getNegative(GBEBPort.class), gbebComp.getPositive(GBEBPort.class), Channel.TWO_WAY);
-
 
     connect(gbebComp.getNegative(Network.class), extPorts.networkPort, Channel.TWO_WAY);
     connect(gbebComp.getNegative(CroupierPort.class), extPorts.croupierPort, Channel.TWO_WAY);

@@ -70,6 +70,8 @@ public class GBEB extends ComponentDefinition {
     protected Handler<BroadcastEvent> broadcastEventHandler = new Handler<BroadcastEvent>() {
         @Override
         public void handle(BroadcastEvent broadcastEvent) {
+            LOG.info("SUWOOOPPPP");
+
             DeliverEvent deliverEvent = new DeliverEvent(selfAdr, broadcastEvent);
             pasts.add(deliverEvent);
         }

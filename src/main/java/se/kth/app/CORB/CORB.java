@@ -65,6 +65,7 @@ public class CORB extends ComponentDefinition {
     protected Handler<CBroadcast> cBroadcastHandler = new Handler<CBroadcast>() {
         @Override
         public void handle(CBroadcast cBroadcast) {
+            LOG.info("EWGWEHEWHEWHEWH");
             ReliableBroadcast reliableBroadcast = new ReliableBroadcast(past, cBroadcast);
             CORBDeliver corbDeliver = new CORBDeliver(selfAdr, cBroadcast);
             trigger(reliableBroadcast, eagerRBPort);

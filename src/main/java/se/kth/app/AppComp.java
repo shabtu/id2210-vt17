@@ -96,7 +96,6 @@ public class AppComp extends ComponentDefinition {
 
     public final KAddress selfAdr;
     public final Identifier gradientOId;
-    public KAddress netAddress;
 
     public Init(KAddress selfAdr, Identifier gradientOId) {
       this.selfAdr = selfAdr;
