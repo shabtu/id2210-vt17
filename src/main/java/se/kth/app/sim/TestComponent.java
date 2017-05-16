@@ -57,7 +57,6 @@ public class TestComponent extends ComponentDefinition {
     Handler<Start> startHandler = new Handler<Start>() {
         @Override
         public void handle(Start start) {
-            LOG.info("WAZZAAAAAAA");
 
             CBroadcast cBroadcast = new CBroadcast(new SimpleEvent());
 

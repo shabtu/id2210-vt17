@@ -70,7 +70,7 @@ public class GBEB extends ComponentDefinition {
     protected Handler<BroadcastEvent> broadcastEventHandler = new Handler<BroadcastEvent>() {
         @Override
         public void handle(BroadcastEvent broadcastEvent) {
-            LOG.info("SUWOOOPPPP");
+
 
             DeliverEvent deliverEvent = new DeliverEvent(selfAdr, broadcastEvent);
             pasts.add(deliverEvent);
@@ -78,6 +78,7 @@ public class GBEB extends ComponentDefinition {
     };
 
     protected Handler<CroupierSample> croupierSampleHandler = new Handler<CroupierSample>() {
+
 
         @Override
         public void handle(CroupierSample croupierSample) {
@@ -100,7 +101,9 @@ public class GBEB extends ComponentDefinition {
         @Override
         public void handle(HistoryRequest historyRequest, KContentMsg kContentMsg) {
 
-            kContentMsg.answer(new HistoryResponse(pasts));
+
+            LOG.info("I am " + selfAdr + " and will send a history response to " + kContentMsg.getHeader().getSource());
+            trigger(kContentMsg.answer(new HistoryResponse(pasts)), networkPort);
 
         }
     };
@@ -109,6 +112,8 @@ public class GBEB extends ComponentDefinition {
 
         @Override
         public void handle(HistoryResponse historyResponse, KContentMsg kContentMsg) {
+            LOG.info("I am " + selfAdr + " and got a history response.");
+
             Set<DeliverEvent> response = historyResponse.getPasts();
 
             Set<DeliverEvent> unseen = Sets.symmetricDifference(pasts, response);

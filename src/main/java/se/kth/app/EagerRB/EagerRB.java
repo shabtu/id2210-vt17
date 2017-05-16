@@ -58,7 +58,6 @@ public class EagerRB extends ComponentDefinition {
     protected Handler<ReliableBroadcast> reliableBroadcastHandler = new Handler<ReliableBroadcast>() {
         @Override
         public void handle(ReliableBroadcast reliableBroadcast) {
-            LOG.info("ewhewhewhewhqwfqwfqw");
 
             trigger(new BroadcastEvent(reliableBroadcast), gbebPort);
         }
