@@ -8,7 +8,12 @@ import se.sics.kompics.KompicsEvent;
 public class SimpleEvent implements KompicsEvent {
 
 
-    String text;
-    public SimpleEvent(){
+    private String textMessage;
+    public SimpleEvent(String textMessage){
+        this.textMessage = textMessage;
+    }
+
+    public String getTextMessage() {
+        return textMessage;
     }
 }

@@ -2,13 +2,10 @@ package se.kth.app.CORB;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.kth.app.EagerRB.EagerRB;
 import se.kth.app.EagerRB.EagerRBPort;
 import se.kth.app.EagerRB.ReliableBroadcast;
 import se.kth.app.EagerRB.ReliableDeliver;
-import se.kth.app.GBEB.DeliverEvent;
-import se.kth.app.GBEB.GBEB;
-import se.kth.app.GBEB.GBEBPort;
+import se.kth.app.Utility.DeliverEvent;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.timer.Timer;
@@ -16,7 +13,6 @@ import se.sics.ktoolbox.util.network.KAddress;
 
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,12 +34,13 @@ public class CORB extends ComponentDefinition {
     //**************************************************************************
     private KAddress selfAdr;
 
-    private Set delivered;
-    private LinkedList past;
+    private Set<DeliverEvent> delivered;
+    private LinkedList<DeliverEvent> past;
 
 
     public CORB(Init init){
         selfAdr = init.selfAdr;
+        logPrefix = "<nid:" + selfAdr + ">";
 
 
         subscribe(handler, control);
@@ -65,10 +62,13 @@ public class CORB extends ComponentDefinition {
     protected Handler<CBroadcast> cBroadcastHandler = new Handler<CBroadcast>() {
         @Override
         public void handle(CBroadcast cBroadcast) {
-            LOG.info("EWGWEHEWHEWHEWH");
-            ReliableBroadcast reliableBroadcast = new ReliableBroadcast(past, cBroadcast);
-            CORBDeliver corbDeliver = new CORBDeliver(selfAdr, cBroadcast);
+            LOG.info("EWGWEHEWHEWHEWH"+ cBroadcast + " event is " + cBroadcast.getEvent());
+
+            ReliableBroadcast reliableBroadcast = new ReliableBroadcast(cBroadcast, past);
+
+            CORBDeliver corbDeliver = new CORBDeliver(selfAdr, cBroadcast.getEvent());
             trigger(reliableBroadcast, eagerRBPort);
+
             past.add(corbDeliver);
 
         }
@@ -84,7 +84,7 @@ public class CORB extends ComponentDefinition {
                     if (!delivered.contains(event)){
                         CORBDeliver corbDeliver = new CORBDeliver(deliverEvent.getkAddress(), deliverEvent.getEvent());
                         trigger(corbDeliver, corbPort);
-                        delivered.add(event);
+                        delivered.add(deliverEvent);
                         if (!past.contains(deliverEvent)){
                             past.add(deliverEvent);
                         }
@@ -93,7 +93,7 @@ public class CORB extends ComponentDefinition {
                 CORBDeliver corbDeliver = new CORBDeliver(reliableDeliver.getkAddress(), reliableDeliver.getEvent());
 
                 trigger(corbDeliver, corbPort);
-                delivered.add(reliableDeliver.getEvent());
+                delivered.add(reliableDeliver);
 
                 if (!past.contains(reliableDeliver)){
                     past.add(reliableDeliver);

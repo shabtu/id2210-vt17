@@ -1,7 +1,6 @@
-package se.kth.app.CORB;
+package se.kth.app.GBEB;
 
 import se.sics.kompics.KompicsEvent;
-import sun.jvm.hotspot.runtime.linux_arm.LinuxARMJavaThreadPDAccess;
 
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -9,13 +8,12 @@ import java.util.LinkedList;
 /**
  * Created by tobiaj on 2017-04-11.
  */
-public class CBroadcast implements KompicsEvent, Serializable{
+public class GBEBBroadcast implements KompicsEvent, Serializable {
 
     private KompicsEvent event;
 
-    public CBroadcast(KompicsEvent event) {
+    public GBEBBroadcast(KompicsEvent event) {
         this.event = event;
-
     }
 
     public KompicsEvent getEvent() {

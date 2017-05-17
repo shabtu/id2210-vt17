@@ -2,10 +2,11 @@ package se.kth.app.EagerRB;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.kth.app.GBEB.BroadcastEvent;
-import se.kth.app.GBEB.DeliverEvent;
-import se.kth.app.GBEB.GBEB;
+import se.kth.app.CORB.CBroadcast;
+import se.kth.app.GBEB.GBEBBroadcast;
+import se.kth.app.GBEB.GBEBDeliver;
 import se.kth.app.GBEB.GBEBPort;
+import se.kth.app.sim.SimpleEvent;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.timer.Timer;
@@ -40,6 +41,8 @@ public class EagerRB extends ComponentDefinition {
 
     public EagerRB(EagerRB.Init init){
         selfAdr = init.selfAdr;
+        logPrefix = "<nid:" + selfAdr + ">";
+
 
         subscribe(handler, control);
         subscribe(reliableBroadcastHandler, eagerPort);
@@ -59,27 +62,41 @@ public class EagerRB extends ComponentDefinition {
         @Override
         public void handle(ReliableBroadcast reliableBroadcast) {
 
-            trigger(new BroadcastEvent(reliableBroadcast), gbebPort);
+            GBEBBroadcast GBEBBroadcast = new GBEBBroadcast(reliableBroadcast);
+
+            CBroadcast cBroadcast = (CBroadcast) reliableBroadcast.getEvent();
+            System.out.println("asdaaf1123123213sda" +  cBroadcast.getEvent());
+
+            System.out.println("SENDING BROADCAST EVENT " + reliableBroadcast.getEvent());
+            System.out.println("SENDING BROADCAST EVENT " + reliableBroadcast);
+            trigger(GBEBBroadcast, gbebPort);
         }
     };
 
-    protected Handler<DeliverEvent> bebDeliver = new Handler<DeliverEvent>() {
+    protected Handler<GBEBDeliver> bebDeliver = new Handler<GBEBDeliver>() {
         @Override
-        public void handle(DeliverEvent deliverEvent) {
-            KompicsEvent event = deliverEvent.getEvent();
+        public void handle(GBEBDeliver gbebDeliver) {
+            KompicsEvent event = gbebDeliver.getEvent();
             if (!delivered.contains(event)){
                 delivered.add(event);
-                ReliableBroadcast reliableBroadcast = (ReliableBroadcast) deliverEvent.getEvent();
-                ReliableDeliver reliableDeliver = new ReliableDeliver(deliverEvent.getkAddress(), deliverEvent.getEvent(), reliableBroadcast.getList());
-                BroadcastEvent broadcastEvent = new BroadcastEvent(deliverEvent);
+                ReliableBroadcast reliableBroadcast = (ReliableBroadcast) gbebDeliver.getEvent();
+                if (reliableBroadcast == null){
+                    System.out.println("OJDÅ" + event);
+                    System.out.println("OJDÅgebee" + gbebDeliver);
+                }
+
+                ReliableDeliver reliableDeliver = new ReliableDeliver(
+                        gbebDeliver.getkAddress(),
+                        gbebDeliver.getEvent(),
+                        reliableBroadcast.getList());
+                GBEBBroadcast GBEBBroadcast = new GBEBBroadcast(gbebDeliver.getEvent());
 
                 trigger(reliableDeliver, eagerPort);
-                trigger(broadcastEvent, gbebPort);
+                trigger(GBEBBroadcast, gbebPort);
 
             }
         }
     };
-
 
 
 

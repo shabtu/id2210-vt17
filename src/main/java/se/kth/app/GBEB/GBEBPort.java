@@ -1,5 +1,6 @@
 package se.kth.app.GBEB;
 
+import se.kth.app.Utility.DeliverEvent;
 import se.sics.kompics.PortType;
 
 /**
@@ -8,7 +9,7 @@ import se.sics.kompics.PortType;
 public class GBEBPort extends PortType {
 
     {
-        request(BroadcastEvent.class);
+        request(GBEBBroadcast.class);
         indication(DeliverEvent.class);
     }
 }

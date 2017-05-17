@@ -32,6 +32,8 @@ import se.sics.ktoolbox.util.network.KHeader;
 import se.sics.ktoolbox.util.network.basic.BasicContentMsg;
 import se.sics.ktoolbox.util.network.basic.BasicHeader;
 
+import java.util.LinkedList;
+
 /**
  * @author Alex Ormenisan <aaor@kth.se>
  */
@@ -58,7 +60,8 @@ public class TestComponent extends ComponentDefinition {
         @Override
         public void handle(Start start) {
 
-            CBroadcast cBroadcast = new CBroadcast(new SimpleEvent());
+            LinkedList linkedList = new LinkedList();
+            CBroadcast cBroadcast = new CBroadcast(new SimpleEvent("The important event"));
 
             KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
             KContentMsg contentMsg = new BasicContentMsg(header, cBroadcast);

@@ -17,7 +17,7 @@ public class ReliableBroadcast implements KompicsEvent, Serializable {
     private KompicsEvent event;
     private LinkedList list;
 
-    public ReliableBroadcast(LinkedList list, CBroadcast event) {
+    public ReliableBroadcast(KompicsEvent event, LinkedList list) {
         this.event = event;
         this.list = list;
 

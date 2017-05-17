@@ -3,15 +3,14 @@ package se.kth.app.GBEB;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.kth.app.EagerRB.EagerRB;
-import se.kth.app.EagerRB.EagerRBPort;
-import se.kth.app.test.Ping;
-import se.kth.app.test.Pong;
+import se.kth.app.CORB.CBroadcast;
+import se.kth.app.EagerRB.ReliableBroadcast;
+import se.kth.app.Utility.DeliverEvent;
+import se.kth.app.sim.SimpleEvent;
 import se.kth.croupier.util.CroupierHelper;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.network.Transport;
-import se.sics.kompics.network.test.Message;
 import se.sics.kompics.timer.Timer;
 import se.sics.ktoolbox.croupier.CroupierPort;
 import se.sics.ktoolbox.croupier.event.CroupierSample;
@@ -21,6 +20,7 @@ import se.sics.ktoolbox.util.network.KHeader;
 import se.sics.ktoolbox.util.network.basic.BasicContentMsg;
 import se.sics.ktoolbox.util.network.basic.BasicHeader;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,6 +49,7 @@ public class GBEB extends ComponentDefinition {
 
     public GBEB(Init init){
         selfAdr = init.selfAdr;
+        logPrefix = "<nid:" + selfAdr + ">";
 
         subscribe(handler, control);
         subscribe(broadcastEventHandler, GBEBPort);
@@ -67,13 +68,31 @@ public class GBEB extends ComponentDefinition {
     };
 
 
-    protected Handler<BroadcastEvent> broadcastEventHandler = new Handler<BroadcastEvent>() {
+    protected Handler<GBEBBroadcast> broadcastEventHandler = new Handler<GBEBBroadcast>() {
         @Override
-        public void handle(BroadcastEvent broadcastEvent) {
+        public void handle(GBEBBroadcast gbebBroadcast) {
+
+            GBEBDeliver gbebDeliver = new GBEBDeliver(selfAdr, gbebBroadcast.getEvent());
+            System.out.println(logPrefix + "Adding gbebdeliver " + gbebBroadcast.getEvent() + " size is " + pasts.size());
+
+            /*
+            ReliableBroadcast reliableBroadcast = (ReliableBroadcast) GBEBBroadcast.getEvent();
+            CBroadcast cBroadcast = (CBroadcast) reliableBroadcast.getEvent();
+            SimpleEvent simpleEvent = (SimpleEvent) cBroadcast.getEvent();
+            System.out.println(GBEBBroadcast.getEvent());
+            System.out.println(reliableBroadcast.getEvent());
+            System.out.println(cBroadcast.getEvent());
+            System.out.println(simpleEvent.getTextMessage());
+*/
+            pasts.add(gbebDeliver);
 
 
-            DeliverEvent deliverEvent = new DeliverEvent(selfAdr, broadcastEvent);
-            pasts.add(deliverEvent);
+            for (DeliverEvent deliverEvent : pasts){
+                System.out.println(logPrefix + "PASTS is now " + deliverEvent.getEvent() + " size is " + pasts.size());
+            }
+
+
+
         }
     };
 
@@ -103,6 +122,9 @@ public class GBEB extends ComponentDefinition {
 
 
             LOG.info("I am " + selfAdr + " and will send a history response to " + kContentMsg.getHeader().getSource());
+            for (DeliverEvent deliverEvent : pasts){
+                System.out.println("sendung " + deliverEvent.getEvent());
+            }
             trigger(kContentMsg.answer(new HistoryResponse(pasts)), networkPort);
 
         }
@@ -112,11 +134,16 @@ public class GBEB extends ComponentDefinition {
 
         @Override
         public void handle(HistoryResponse historyResponse, KContentMsg kContentMsg) {
-            LOG.info("I am " + selfAdr + " and got a history response.");
+            LOG.info("I am " + selfAdr + " and got a history response.  size is " + pasts.size());
 
             Set<DeliverEvent> response = historyResponse.getPasts();
 
-            Set<DeliverEvent> unseen = Sets.symmetricDifference(pasts, response);
+
+            System.out.println("TITTA" + Arrays.toString(pasts.toArray()));
+
+
+            Set<DeliverEvent> unseen = Sets.difference(pasts, response);
+
 
             for (DeliverEvent deliverEvent : unseen) {
                 trigger(deliverEvent, GBEBPort);

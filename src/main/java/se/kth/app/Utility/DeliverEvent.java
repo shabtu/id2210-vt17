@@ -1,4 +1,4 @@
-package se.kth.app.GBEB;
+package se.kth.app.Utility;
 
 import se.sics.kompics.KompicsEvent;
 import se.sics.ktoolbox.util.network.KAddress;

@@ -1,5 +1,6 @@
 package se.kth.app.GBEB;
 
+import se.kth.app.Utility.DeliverEvent;
 import se.sics.kompics.KompicsEvent;
 
 import java.util.Set;
