@@ -11,20 +11,20 @@ import java.io.Serializable;
  */
 public class CORBDeliver extends DeliverEvent{
 
-    public KAddress getkAddress() {
-        return kAddress;
-    }
-
-    private KAddress kAddress;
-
-    public KompicsEvent getEvent() {
-        return event;
-    }
-
-    private KompicsEvent event;
 
     public CORBDeliver(KAddress kAddress, KompicsEvent event){
         super(kAddress, event);
 
     }
+
+
+    public KAddress getkAddress() {
+        return super.getkAddress();
+    }
+
+
+    public KompicsEvent getEvent() {
+        return super.getEvent();
+    }
+
 }

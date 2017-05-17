@@ -13,10 +13,6 @@ import java.util.List;
  */
 public class ReliableDeliver extends DeliverEvent {
 
-
-    private KAddress kAddress;
-    private KompicsEvent event;
-
     private LinkedList list;
 
     public ReliableDeliver(KAddress kAddress, KompicsEvent event, LinkedList list){
@@ -28,10 +24,10 @@ public class ReliableDeliver extends DeliverEvent {
         return list;
     }
     public KompicsEvent getEvent() {
-        return event;
+        return super.getEvent();
     }
     public KAddress getkAddress() {
-        return kAddress;
+        return super.getkAddress();
     }
 
 

@@ -75,23 +75,7 @@ public class GBEB extends ComponentDefinition {
             GBEBDeliver gbebDeliver = new GBEBDeliver(selfAdr, gbebBroadcast.getEvent());
             System.out.println(logPrefix + "Adding gbebdeliver " + gbebBroadcast.getEvent() + " size is " + pasts.size());
 
-            /*
-            ReliableBroadcast reliableBroadcast = (ReliableBroadcast) GBEBBroadcast.getEvent();
-            CBroadcast cBroadcast = (CBroadcast) reliableBroadcast.getEvent();
-            SimpleEvent simpleEvent = (SimpleEvent) cBroadcast.getEvent();
-            System.out.println(GBEBBroadcast.getEvent());
-            System.out.println(reliableBroadcast.getEvent());
-            System.out.println(cBroadcast.getEvent());
-            System.out.println(simpleEvent.getTextMessage());
-*/
             pasts.add(gbebDeliver);
-
-
-            for (DeliverEvent deliverEvent : pasts){
-                System.out.println(logPrefix + "PASTS is now " + deliverEvent.getEvent() + " size is " + pasts.size());
-            }
-
-
 
         }
     };
@@ -120,11 +104,7 @@ public class GBEB extends ComponentDefinition {
         @Override
         public void handle(HistoryRequest historyRequest, KContentMsg kContentMsg) {
 
-
             LOG.info("I am " + selfAdr + " and will send a history response to " + kContentMsg.getHeader().getSource());
-            for (DeliverEvent deliverEvent : pasts){
-                System.out.println("sendung " + deliverEvent.getEvent());
-            }
             trigger(kContentMsg.answer(new HistoryResponse(pasts)), networkPort);
 
         }
@@ -138,14 +118,11 @@ public class GBEB extends ComponentDefinition {
 
             Set<DeliverEvent> response = historyResponse.getPasts();
 
-
-            System.out.println("TITTA" + Arrays.toString(pasts.toArray()));
-
-
             Set<DeliverEvent> unseen = Sets.difference(pasts, response);
 
 
             for (DeliverEvent deliverEvent : unseen) {
+                LOG.info(" I AM " + selfAdr +" sending " + deliverEvent.getEvent());
                 trigger(deliverEvent, GBEBPort);
             }
 

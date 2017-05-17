@@ -9,22 +9,17 @@ import se.sics.ktoolbox.util.network.KAddress;
  */
 public class GBEBDeliver extends DeliverEvent {
 
-
-    private KAddress kAddress;
-    private KompicsEvent event;
-
-
     public GBEBDeliver(KAddress kAddress, KompicsEvent event) {
         super(kAddress, event);
     }
 
     @Override
     public KAddress getkAddress() {
-        return kAddress;
+        return super.getkAddress();
     }
 
     @Override
     public KompicsEvent getEvent() {
-        return event;
+        return super.getEvent();
     }
 }
