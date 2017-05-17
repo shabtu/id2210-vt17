@@ -73,7 +73,6 @@ public class GBEB extends ComponentDefinition {
         public void handle(GBEBBroadcast gbebBroadcast) {
 
             GBEBDeliver gbebDeliver = new GBEBDeliver(selfAdr, gbebBroadcast.getEvent());
-            System.out.println(logPrefix + "Adding gbebdeliver " + gbebBroadcast.getEvent() + " size is " + pasts.size());
 
             pasts.add(gbebDeliver);
 
@@ -104,7 +103,7 @@ public class GBEB extends ComponentDefinition {
         @Override
         public void handle(HistoryRequest historyRequest, KContentMsg kContentMsg) {
 
-            LOG.info("I am " + selfAdr + " and will send a history response to " + kContentMsg.getHeader().getSource());
+            LOG.info("I am " + selfAdr + " and will send a history response to " + kContentMsg.getHeader().getSource() + " with pasts " + pasts.size());
             trigger(kContentMsg.answer(new HistoryResponse(pasts)), networkPort);
 
         }
@@ -114,11 +113,13 @@ public class GBEB extends ComponentDefinition {
 
         @Override
         public void handle(HistoryResponse historyResponse, KContentMsg kContentMsg) {
-            LOG.info("I am " + selfAdr + " and got a history response.  size is " + pasts.size());
+            //LOG.info("I am " + selfAdr + " and got a history response from " + kContentMsg.getHeader().getSource() + " and response is " + historyResponse.getPasts().size());
 
             Set<DeliverEvent> response = historyResponse.getPasts();
 
-            Set<DeliverEvent> unseen = Sets.difference(pasts, response);
+            Set<DeliverEvent> unseen = Sets.difference(response, pasts);
+
+
 
 
             for (DeliverEvent deliverEvent : unseen) {
@@ -127,6 +128,8 @@ public class GBEB extends ComponentDefinition {
             }
 
             pasts.addAll(unseen);
+
+
 
         }
     };

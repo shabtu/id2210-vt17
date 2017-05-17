@@ -6,6 +6,7 @@ import se.kth.app.CORB.CBroadcast;
 import se.kth.app.GBEB.GBEBBroadcast;
 import se.kth.app.GBEB.GBEBDeliver;
 import se.kth.app.GBEB.GBEBPort;
+import se.kth.app.Utility.DeliverEvent;
 import se.kth.app.sim.SimpleEvent;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
@@ -72,6 +73,7 @@ public class EagerRB extends ComponentDefinition {
         public void handle(GBEBDeliver gbebDeliver) {
             KompicsEvent event = gbebDeliver.getEvent();
             if (!delivered.contains(event)){
+
                 delivered.add(event);
                 ReliableBroadcast reliableBroadcast = (ReliableBroadcast) gbebDeliver.getEvent();
 
