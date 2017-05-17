@@ -73,15 +73,14 @@ public class EagerRB extends ComponentDefinition {
         public void handle(GBEBDeliver gbebDeliver) {
             KompicsEvent event = gbebDeliver.getEvent();
             if (!delivered.contains(event)){
-
                 delivered.add(event);
                 ReliableBroadcast reliableBroadcast = (ReliableBroadcast) gbebDeliver.getEvent();
 
                 ReliableDeliver reliableDeliver = new ReliableDeliver(
                         gbebDeliver.getkAddress(),
-                        gbebDeliver.getEvent(),
+                        ((ReliableBroadcast) gbebDeliver.getEvent()).getEvent(),
                         reliableBroadcast.getList());
-                GBEBBroadcast GBEBBroadcast = new GBEBBroadcast(gbebDeliver.getEvent());
+                GBEBBroadcast GBEBBroadcast = new GBEBBroadcast(gbebDeliver);
 
                 trigger(reliableDeliver, eagerPort);
                 trigger(GBEBBroadcast, gbebPort);
