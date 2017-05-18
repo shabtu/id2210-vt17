@@ -17,7 +17,6 @@
  */
 package se.kth.app.sim;
 
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import se.kth.sim.compatibility.SimNodeIdExtractor;
@@ -29,9 +28,7 @@ import se.sics.kompics.network.Address;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.adaptor.Operation;
 import se.sics.kompics.simulator.adaptor.Operation1;
-import se.sics.kompics.simulator.adaptor.distributions.ConstantDistribution;
 import se.sics.kompics.simulator.adaptor.distributions.extra.BasicIntSequentialDistribution;
-import se.sics.kompics.simulator.events.system.KillNodeEvent;
 import se.sics.kompics.simulator.events.system.SetupEvent;
 import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.network.identifier.IdentifierExtractor;
@@ -117,29 +114,6 @@ public class ScenarioGen {
         }
     };
 
-    static Operation1 killNodeOp = new Operation1<KillNodeEvent, Integer>() {
-        @Override
-        public KillNodeEvent generate(final Integer self) {
-            return new KillNodeEvent() {
-                KAddress selfAdr;
-
-                {
-                    selfAdr = ScenarioSetup.getNodeAdr("192.0.0.1", 1);
-                }
-
-                @Override
-                public Address getNodeAddress() {
-                    return selfAdr;
-                }
-
-                @Override
-                public String toString() {
-                    return "KillPonger<" + selfAdr.toString() + ">";
-                }
-            };
-        }
-    };
-
     static Operation1<StartNodeEvent, Integer> startNodeOp = new Operation1<StartNodeEvent, Integer>() {
 
         @Override
@@ -183,12 +157,6 @@ public class ScenarioGen {
     public static SimulationScenario simpleBoot() {
         SimulationScenario scen = new SimulationScenario() {
             {
-                StochasticProcess killNode = new StochasticProcess() {
-                    {
-                        eventInterArrivalTime(constant(1000));
-                        raise(1, killNodeOp, new ConstantDistribution<>(Integer.class,2));
-                    }
-                };
                 StochasticProcess systemSetup = new StochasticProcess() {
                     {
                         eventInterArrivalTime(constant(1000));
@@ -221,8 +189,7 @@ public class ScenarioGen {
 
                 startTest.startAfterTerminationOf(1000, startPeers);
                 terminateAfterTerminationOf(1000*1000, startTest);
-                killNode.startAfterTerminationOf(100, startTest);
-                startTest.startAfterTerminationOf(1000, killNode);
+
             }
         };
 
