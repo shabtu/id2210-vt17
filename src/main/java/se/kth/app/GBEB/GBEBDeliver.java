@@ -23,4 +23,12 @@ public class GBEBDeliver implements KompicsEvent {
     public DeliverEvent getEvent() {
         return this.event;
     }
+
+    public Set<DeliverEvent> getList() {
+        return list;
+    }
+
+    public void setList(Set<DeliverEvent> list) {
+        this.list = list;
+    }
 }

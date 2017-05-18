@@ -248,6 +248,8 @@ public class ScenarioGen {
 
                 reviveNode.startAfterTerminationOf(5000, startTest);
 
+                //startTest.startAfterTerminationOf(1000, reviveNode);
+
                 terminateAfterTerminationOf(1000*1000, reviveNode);
                //startTest.startAfterTerminationOf(1000, killNode);
             }

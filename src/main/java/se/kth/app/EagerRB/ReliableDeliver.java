@@ -19,11 +19,18 @@ public class ReliableDeliver implements KompicsEvent {
 
     public ReliableDeliver(DeliverEvent event){
         this.event = event;
-        this.list = list;
     }
 
     public DeliverEvent getEvent() {
         return this.event;
+    }
+
+    public Set<DeliverEvent> getList() {
+        return list;
+    }
+
+    public void setList(Set<DeliverEvent> list) {
+        this.list = list;
     }
 
 }

@@ -37,7 +37,7 @@ public class CORB extends ComponentDefinition {
     //**************************************************************************
     private KAddress selfAdr;
 
-    private Set<DeliverEvent> delivered;
+    private Set<SimpleEvent> delivered;
     private Set<DeliverEvent> past;
 
 
@@ -65,10 +65,12 @@ public class CORB extends ComponentDefinition {
     protected Handler<CBroadcast> cBroadcastHandler = new Handler<CBroadcast>() {
         @Override
         public void handle(CBroadcast cBroadcast) {
-            LOG.info("EWGWEHEWHEWHEWH" + cBroadcast + " event is " + cBroadcast.getEvent());
+            //LOG.info("EWGWEHEWHEWHEWH" + cBroadcast + " event is " + cBroadcast.getEvent());
 
-            ReliableBroadcast reliableBroadcast = new ReliableBroadcast(new DeliverEvent(new SimpleEvent("Test"), selfAdr));
+            ReliableBroadcast reliableBroadcast = new ReliableBroadcast(new DeliverEvent(cBroadcast.getEvent().getEvent(), selfAdr));
             reliableBroadcast.setList(past);
+
+            //System.out.println("IN CORB the list is " + reliableBroadcast.getList());
 
 
             trigger(reliableBroadcast, eagerRBPort);
@@ -81,25 +83,31 @@ public class CORB extends ComponentDefinition {
     protected Handler<ReliableDeliver> reliableDeliverHandler = new Handler<ReliableDeliver>() {
         @Override
         public void handle(ReliableDeliver reliableDeliver) {
-            if (!delivered.contains(reliableDeliver.getEvent())) {
-                //LinkedList<DeliverEvent> list = reliableDeliver.getList();
-                for (DeliverEvent event : past) {
-                    //KompicsEvent event = deliverEvent.getEvent();
+
+            //System.out.println("IN CORB UP " + reliableDeliver.getList());
+            if (!delivered.contains(reliableDeliver.getEvent().getEvent())) {
+                Set<DeliverEvent> list = reliableDeliver.getEvent().getList();
+                for (DeliverEvent deliverEvent : list) {
+                    KompicsEvent event = deliverEvent.getEvent();
+                    //System.out.println("THE EVENT IS " + event +  "the delvier event is " + deliverEvent + " reliable event is " + reliableDeliver.getEvent());
+
                     if (!delivered.contains(event)) {
-                        CORBDeliver corbDeliver = new CORBDeliver(event);
+                        CORBDeliver corbDeliver = new CORBDeliver(deliverEvent);
 
                         trigger(corbDeliver, corbPort);
-                        delivered.add(event);
+                        delivered.add((SimpleEvent) event);
                         if (!past.contains(event)) {
-                            past.add(event);
+                            past.add(deliverEvent);
+                            return;
                         }
                     }
                 }
 
                 CORBDeliver corbDeliver = new CORBDeliver(reliableDeliver.getEvent());
+                corbDeliver.setList(reliableDeliver.getList());
 
                 trigger(corbDeliver, corbPort);
-                delivered.add(reliableDeliver.getEvent());
+                delivered.add(reliableDeliver.getEvent().getEvent());
 
                 if (!past.contains(reliableDeliver)) {
                     past.add(reliableDeliver.getEvent());

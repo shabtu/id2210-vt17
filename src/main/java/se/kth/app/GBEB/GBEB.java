@@ -73,6 +73,10 @@ public class GBEB extends ComponentDefinition {
         public void handle(GBEBBroadcast gbebBroadcast) {
 
             GBEBDeliver gbebDeliver = new GBEBDeliver(gbebBroadcast.getEvent());
+            gbebDeliver.getEvent().setList(gbebBroadcast.getList());
+
+
+            //System.out.println(gbebBroadcast.getEvent()+ " IN BEB the list " + gbebBroadcast.getList());
 
             pasts.add(gbebDeliver.getEvent());
 
@@ -123,8 +127,10 @@ public class GBEB extends ComponentDefinition {
 
 
             for (DeliverEvent deliverEvent : unseen) {
-                LOG.info(" I AM " + selfAdr +" sending " + deliverEvent.getEvent());
-                trigger(new GBEBDeliver(deliverEvent), GBEBPort);
+                //LOG.info(" I AM " + selfAdr +" sending " + deliverEvent.getEvent() + " the list is HISTORY " + deliverEvent.getList());
+                GBEBDeliver gbebDeliver = new GBEBDeliver(deliverEvent);
+                gbebDeliver.setList(deliverEvent.getList());
+                trigger(gbebDeliver, GBEBPort);
             }
 
             pasts.addAll(unseen);
