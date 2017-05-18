@@ -7,28 +7,23 @@ import se.sics.ktoolbox.util.network.KAddress;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by tobiaj on 2017-04-11.
  */
-public class ReliableDeliver extends DeliverEvent {
+public class ReliableDeliver implements KompicsEvent {
 
-    private LinkedList list;
+    private DeliverEvent event;
+    private Set<DeliverEvent> list;
 
-    public ReliableDeliver(KAddress kAddress, KompicsEvent event, LinkedList list){
-        super(kAddress, event);
+    public ReliableDeliver(DeliverEvent event){
+        this.event = event;
         this.list = list;
     }
 
-    public LinkedList getList() {
-        return list;
+    public DeliverEvent getEvent() {
+        return this.event;
     }
-    public KompicsEvent getEvent() {
-        return super.getEvent();
-    }
-    public KAddress getkAddress() {
-        return super.getkAddress();
-    }
-
 
 }

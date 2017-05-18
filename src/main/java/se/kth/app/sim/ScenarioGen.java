@@ -17,8 +17,11 @@
  */
 package se.kth.app.sim;
 
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+
 import se.kth.sim.compatibility.SimNodeIdExtractor;
 import se.kth.system.HostMngrComp;
 import se.sics.kompics.ComponentDefinition;
@@ -28,7 +31,10 @@ import se.sics.kompics.network.Address;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.adaptor.Operation;
 import se.sics.kompics.simulator.adaptor.Operation1;
+import se.sics.kompics.simulator.adaptor.distributions.ConstantDistribution;
+import se.sics.kompics.simulator.adaptor.distributions.IntegerUniformDistribution;
 import se.sics.kompics.simulator.adaptor.distributions.extra.BasicIntSequentialDistribution;
+import se.sics.kompics.simulator.events.system.KillNodeEvent;
 import se.sics.kompics.simulator.events.system.SetupEvent;
 import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.network.identifier.IdentifierExtractor;
@@ -40,6 +46,7 @@ import se.sics.ktoolbox.util.network.KAddress;
  * @author Alex Ormenisan <aaor@kth.se>
  */
 public class ScenarioGen {
+
 
     static Operation<SetupEvent> systemSetupOp = new Operation<SetupEvent>() {
         @Override
@@ -89,7 +96,7 @@ public class ScenarioGen {
             final KAddress target;
 
             {
-                String selfIp = "193.0.0.1";
+                String selfIp = "193.0.0." + integer;
                 selfAdr = ScenarioSetup.getNodeAdr(selfIp,integer);
 
                 String targetIp = "193.0.0.2";
@@ -109,6 +116,29 @@ public class ScenarioGen {
                 @Override
                 public TestComponent.Init getComponentInit() {
                     return new TestComponent.Init(selfAdr, target);
+                }
+            };
+        }
+    };
+
+    static Operation1 killNodeOp = new Operation1<KillNodeEvent, Integer>() {
+        @Override
+        public KillNodeEvent generate(final Integer self) {
+            return new KillNodeEvent() {
+                KAddress selfAdr;
+
+                {
+                    selfAdr = ScenarioSetup.getNodeAdr("192.0.0." + self, self);
+                }
+
+                @Override
+                public Address getNodeAddress() {
+                    return selfAdr;
+                }
+
+                @Override
+                public String toString() {
+                    return "KillPonger<" + selfAdr.toString() + ">";
                 }
             };
         }
@@ -155,8 +185,18 @@ public class ScenarioGen {
     };
 
     public static SimulationScenario simpleBoot() {
+
+
+        final long seed1 = 32523, seed2 = 3346347;
+
         SimulationScenario scen = new SimulationScenario() {
             {
+                StochasticProcess killNode = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(constant(1000));
+                        raise(1, killNodeOp, new IntegerUniformDistribution(4,6, new Random(seed1)));
+                    }
+                };
                 StochasticProcess systemSetup = new StochasticProcess() {
                     {
                         eventInterArrivalTime(constant(1000));
@@ -176,20 +216,40 @@ public class ScenarioGen {
                     }
                 };
 
+                StochasticProcess startPeersToKill = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(uniform(1000, 1100));
+                        raise(3, startNodeOp, new BasicIntSequentialDistribution(4));
+                    }
+                };
+
+                final StochasticProcess reviveNode = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(uniform(1000, 1100));
+                        raise(1, startNodeOp, new BasicIntSequentialDistribution(5));
+                    }
+                };
+
                 StochasticProcess startTest = new StochasticProcess() {
                     {
-                        //eventInterArrivalTime(constant(1000));
-                        raise(1, testOp, new BasicIntSequentialDistribution(1));
+                        eventInterArrivalTime(constant(1000));
+                        raise(1, testOp, new IntegerUniformDistribution(4,6, new Random(seed2)));
                     }
                 };
 
                 systemSetup.start();
                 startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
                 startPeers.startAfterTerminationOf(1000, startBootstrapServer);
+                startPeersToKill.startAfterTerminationOf(1000, startPeers);
 
-                startTest.startAfterTerminationOf(1000, startPeers);
-                terminateAfterTerminationOf(1000*1000, startTest);
+                killNode.startAfterTerminationOf(1000, startPeersToKill);
 
+                startTest.startAfterTerminationOf(1000, startPeersToKill);
+
+                reviveNode.startAfterTerminationOf(5000, startTest);
+
+                terminateAfterTerminationOf(1000*1000, reviveNode);
+               //startTest.startAfterTerminationOf(1000, killNode);
             }
         };
 

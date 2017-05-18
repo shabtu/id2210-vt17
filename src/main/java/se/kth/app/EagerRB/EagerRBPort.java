@@ -2,6 +2,7 @@ package se.kth.app.EagerRB;
 
 import com.sun.org.apache.regexp.internal.RE;
 import se.kth.app.CORB.CBroadcast;
+import se.kth.app.Utility.DeliverEvent;
 import se.sics.kompics.PortType;
 
 /**

@@ -1,25 +1,26 @@
 package se.kth.app.GBEB;
 
 import se.kth.app.Utility.DeliverEvent;
+import se.kth.app.sim.SimpleEvent;
 import se.sics.kompics.KompicsEvent;
 import se.sics.ktoolbox.util.network.KAddress;
+
+import java.util.Set;
 
 /**
  * Created by tobiaj on 2017-05-16.
  */
-public class GBEBDeliver extends DeliverEvent {
+public class GBEBDeliver implements KompicsEvent {
 
-    public GBEBDeliver(KAddress kAddress, KompicsEvent event) {
-        super(kAddress, event);
+
+    private DeliverEvent event;
+    private Set<DeliverEvent> list;
+
+    public GBEBDeliver(DeliverEvent event) {
+        this.event = event;
     }
 
-    @Override
-    public KAddress getkAddress() {
-        return super.getkAddress();
-    }
-
-    @Override
-    public KompicsEvent getEvent() {
-        return super.getEvent();
+    public DeliverEvent getEvent() {
+        return this.event;
     }
 }
