@@ -22,9 +22,4 @@ public class GBEBDeliver extends DeliverEvent {
     public KompicsEvent getEvent() {
         return super.getEvent();
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
-    }
 }
