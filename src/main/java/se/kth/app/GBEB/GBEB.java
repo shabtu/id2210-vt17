@@ -72,9 +72,9 @@ public class GBEB extends ComponentDefinition {
         @Override
         public void handle(GBEBBroadcast gbebBroadcast) {
 
-            GBEBDeliver gbebDeliver = new GBEBDeliver(selfAdr, gbebBroadcast.getEvent());
+            GBEBDeliver gbebDeliver = new GBEBDeliver(gbebBroadcast.getEvent());
 
-            pasts.add(gbebDeliver);
+            pasts.add(gbebDeliver.getEvent());
 
         }
     };
@@ -103,7 +103,7 @@ public class GBEB extends ComponentDefinition {
         @Override
         public void handle(HistoryRequest historyRequest, KContentMsg kContentMsg) {
 
-            LOG.info("I am " + selfAdr + " and will send a history response to " + kContentMsg.getHeader().getSource() + " with pasts " + pasts.size());
+            //LOG.info("I am " + selfAdr + " and will send a history response to " + kContentMsg.getHeader().getSource() + " with pasts " + pasts.size());
             trigger(kContentMsg.answer(new HistoryResponse(pasts)), networkPort);
 
         }
@@ -124,7 +124,7 @@ public class GBEB extends ComponentDefinition {
 
             for (DeliverEvent deliverEvent : unseen) {
                 LOG.info(" I AM " + selfAdr +" sending " + deliverEvent.getEvent());
-                trigger(deliverEvent, GBEBPort);
+                trigger(new GBEBDeliver(deliverEvent), GBEBPort);
             }
 
             pasts.addAll(unseen);

@@ -63,7 +63,7 @@ public class EagerRB extends ComponentDefinition {
         @Override
         public void handle(ReliableBroadcast reliableBroadcast) {
 
-            GBEBBroadcast GBEBBroadcast = new GBEBBroadcast(reliableBroadcast);
+            GBEBBroadcast GBEBBroadcast = new GBEBBroadcast(reliableBroadcast.getEvent());
             trigger(GBEBBroadcast, gbebPort);
         }
     };
@@ -75,12 +75,9 @@ public class EagerRB extends ComponentDefinition {
             if (!delivered.contains(event)){
 
                 delivered.add(event);
-                ReliableBroadcast reliableBroadcast = (ReliableBroadcast) gbebDeliver.getEvent();
 
-                ReliableDeliver reliableDeliver = new ReliableDeliver(
-                        gbebDeliver.getkAddress(),
-                        gbebDeliver.getEvent(),
-                        reliableBroadcast.getList());
+                ReliableDeliver reliableDeliver = new ReliableDeliver(gbebDeliver.getEvent());
+
                 GBEBBroadcast GBEBBroadcast = new GBEBBroadcast(gbebDeliver.getEvent());
 
                 trigger(reliableDeliver, eagerPort);

@@ -10,6 +10,6 @@ public class GBEBPort extends PortType {
 
     {
         request(GBEBBroadcast.class);
-        indication(DeliverEvent.class);
+        indication(GBEBDeliver.class);
     }
 }
