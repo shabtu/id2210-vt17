@@ -77,7 +77,8 @@ public class AppComp extends ComponentDefinition {
     @Override
     public void handle(CORBDeliver corbDeliver) {
 
-      LOG.info("{} received {} from {} ", logPrefix, corbDeliver.getEvent(), corbDeliver.getkAddress());
+      LOG.info("{} received {} from {} ", logPrefix, corbDeliver.getEvent().getEvent().getTextMessage(), corbDeliver.getEvent().getSelfAdr());
+
       //SimpleEvent simpleEvent = (SimpleEvent) corbDeliver.getEvent();
 
 

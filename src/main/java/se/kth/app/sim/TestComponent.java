@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.kth.app.AppComp;
 import se.kth.app.CORB.CBroadcast;
+import se.kth.app.Utility.DeliverEvent;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.network.Transport;
@@ -60,13 +61,19 @@ public class TestComponent extends ComponentDefinition {
         @Override
         public void handle(Start start) {
 
-            LinkedList linkedList = new LinkedList();
-            CBroadcast cBroadcast = new CBroadcast(new SimpleEvent("The important event"));
+            LOG.info("I am sending the message " + selfAdr);
 
-            KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
-            KContentMsg contentMsg = new BasicContentMsg(header, cBroadcast);
 
-            trigger(contentMsg, networkPort);
+            //LinkedList linkedList = new LinkedList();
+            for (int i = 0; i < 1; i++) {
+
+
+                CBroadcast cBroadcast = new CBroadcast(new DeliverEvent(new SimpleEvent("The important event"), selfAdr));
+
+                KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+                KContentMsg contentMsg = new BasicContentMsg(header, cBroadcast);
+                trigger(contentMsg, networkPort);
+            }
         }
     };
 
@@ -81,6 +88,7 @@ public class TestComponent extends ComponentDefinition {
 
         }
     }
+
     {
         subscribe(startHandler, control);
     }

@@ -2,29 +2,28 @@ package se.kth.app.CORB;
 
 import se.kth.app.Utility.DeliverEvent;
 import se.sics.kompics.KompicsEvent;
-import se.sics.ktoolbox.util.network.KAddress;
 
-import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Created by tobiaj on 2017-04-11.
  */
-public class CORBDeliver extends DeliverEvent{
+public class CORBDeliver implements KompicsEvent{
 
 
-    public CORBDeliver(KAddress kAddress, KompicsEvent event){
-        super(kAddress, event);
+    private DeliverEvent event;
+    private Set<DeliverEvent> list;
 
+    public CORBDeliver(DeliverEvent event){
+        this.event = event;
     }
 
-
-    public KAddress getkAddress() {
-        return super.getkAddress();
+    public DeliverEvent getEvent() {
+        return this.event;
     }
 
-
-    public KompicsEvent getEvent() {
-        return super.getEvent();
+    public void setList(Set<DeliverEvent> list) {
+        this.list = list;
     }
-
 }

@@ -1,11 +1,13 @@
 package se.kth.app.CORB;
 
+import com.sun.org.apache.regexp.internal.RE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.kth.app.EagerRB.EagerRBPort;
 import se.kth.app.EagerRB.ReliableBroadcast;
 import se.kth.app.EagerRB.ReliableDeliver;
 import se.kth.app.Utility.DeliverEvent;
+import se.kth.app.sim.SimpleEvent;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.timer.Timer;
@@ -31,14 +33,15 @@ public class CORB extends ComponentDefinition {
 
     Positive<EagerRBPort> eagerRBPort = requires(EagerRBPort.class);
 
+
     //**************************************************************************
     private KAddress selfAdr;
 
     private Set<DeliverEvent> delivered;
-    private LinkedList<DeliverEvent> past;
+    private Set<DeliverEvent> past;
 
 
-    public CORB(Init init){
+    public CORB(Init init) {
         selfAdr = init.selfAdr;
         logPrefix = "<nid:" + selfAdr + ">";
 
@@ -53,7 +56,7 @@ public class CORB extends ComponentDefinition {
         @Override
         public void handle(Start start) {
             delivered = new HashSet();
-            past = new LinkedList();
+            past = new HashSet<>();
 
         }
     };
@@ -62,14 +65,15 @@ public class CORB extends ComponentDefinition {
     protected Handler<CBroadcast> cBroadcastHandler = new Handler<CBroadcast>() {
         @Override
         public void handle(CBroadcast cBroadcast) {
-            LOG.info("EWGWEHEWHEWHEWH"+ cBroadcast + " event is " + cBroadcast.getEvent());
+            LOG.info("EWGWEHEWHEWHEWH" + cBroadcast + " event is " + cBroadcast.getEvent());
 
-            ReliableBroadcast reliableBroadcast = new ReliableBroadcast(cBroadcast, past);
+            ReliableBroadcast reliableBroadcast = new ReliableBroadcast(new DeliverEvent(new SimpleEvent("Test"), selfAdr));
+            reliableBroadcast.setList(past);
 
-            CORBDeliver corbDeliver = new CORBDeliver(selfAdr, cBroadcast.getEvent());
+
             trigger(reliableBroadcast, eagerRBPort);
 
-            past.add(corbDeliver);
+            past.add(cBroadcast.getEvent());
 
         }
     };
@@ -77,26 +81,28 @@ public class CORB extends ComponentDefinition {
     protected Handler<ReliableDeliver> reliableDeliverHandler = new Handler<ReliableDeliver>() {
         @Override
         public void handle(ReliableDeliver reliableDeliver) {
-            if (!delivered.contains(reliableDeliver.getEvent())){
-                LinkedList<DeliverEvent> list = reliableDeliver.getList();
-                for (DeliverEvent deliverEvent : list){
-                    KompicsEvent event = deliverEvent.getEvent();
-                    if (!delivered.contains(event)){
-                        CORBDeliver corbDeliver = new CORBDeliver(deliverEvent.getkAddress(), deliverEvent.getEvent());
+            if (!delivered.contains(reliableDeliver.getEvent())) {
+                //LinkedList<DeliverEvent> list = reliableDeliver.getList();
+                for (DeliverEvent event : past) {
+                    //KompicsEvent event = deliverEvent.getEvent();
+                    if (!delivered.contains(event)) {
+                        CORBDeliver corbDeliver = new CORBDeliver(event);
+
                         trigger(corbDeliver, corbPort);
-                        delivered.add(deliverEvent);
-                        if (!past.contains(deliverEvent)){
-                            past.add(deliverEvent);
+                        delivered.add(event);
+                        if (!past.contains(event)) {
+                            past.add(event);
                         }
                     }
                 }
-                CORBDeliver corbDeliver = new CORBDeliver(reliableDeliver.getkAddress(), reliableDeliver.getEvent());
+
+                CORBDeliver corbDeliver = new CORBDeliver(reliableDeliver.getEvent());
 
                 trigger(corbDeliver, corbPort);
-                delivered.add(reliableDeliver);
+                delivered.add(reliableDeliver.getEvent());
 
-                if (!past.contains(reliableDeliver)){
-                    past.add(reliableDeliver);
+                if (!past.contains(reliableDeliver)) {
+                    past.add(reliableDeliver.getEvent());
                 }
 
             }
