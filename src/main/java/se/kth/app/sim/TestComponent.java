@@ -20,7 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.kth.app.AppComp;
 import se.kth.app.CORB.CBroadcast;
+import se.kth.app.Utility.AddEvent;
 import se.kth.app.Utility.DeliverEvent;
+import se.kth.app.Utility.RemoveEvent;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.network.Transport;
@@ -63,19 +65,48 @@ public class TestComponent extends ComponentDefinition {
 
             LOG.info("I am sending the message " + selfAdr);
 
+            sendSimpleEvent();
+            
+            //sendAddEvent();
 
-            //LinkedList linkedList = new LinkedList();
-            for (int i = 0; i < 1; i++) {
+            //sendRemoveEvent();
 
 
-                CBroadcast cBroadcast = new CBroadcast(new DeliverEvent(new SimpleEvent("The important event"), selfAdr));
-
-                KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
-                KContentMsg contentMsg = new BasicContentMsg(header, cBroadcast);
-                trigger(contentMsg, networkPort);
-            }
         }
+        
     };
+
+    private void sendRemoveEvent() {
+
+        RemoveEvent removeEvent = new RemoveEvent("remove");
+
+        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+        KContentMsg contentMsg = new BasicContentMsg(header, removeEvent);
+        trigger(contentMsg, networkPort);
+    }
+
+    private void sendAddEvent() {
+
+
+        AddEvent addEvent = new AddEvent("add");
+
+
+        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+        KContentMsg contentMsg = new BasicContentMsg(header, addEvent);
+        trigger(contentMsg, networkPort);
+    }
+
+    private void sendSimpleEvent() {
+
+        for (int i = 0; i < 3; i++) {
+
+            CBroadcast cBroadcast = new CBroadcast(new DeliverEvent(new SimpleEvent("The important event" + i), selfAdr));
+
+            KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+            KContentMsg contentMsg = new BasicContentMsg(header, cBroadcast);
+            trigger(contentMsg, networkPort);
+        }
+    }
 
     public static class Init extends se.sics.kompics.Init<TestComponent> {
 

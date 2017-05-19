@@ -37,7 +37,7 @@ public class CORB extends ComponentDefinition {
     //**************************************************************************
     private KAddress selfAdr;
 
-    private Set<SimpleEvent> delivered;
+    private Set<KompicsEvent> delivered;
     private Set<DeliverEvent> past;
 
 
@@ -84,35 +84,39 @@ public class CORB extends ComponentDefinition {
         @Override
         public void handle(ReliableDeliver reliableDeliver) {
 
-            //System.out.println("IN CORB UP " + reliableDeliver.getList());
+            //System.out.println(logPrefix + " IN CORB UP " + reliableDeliver.getList());
+            //System.out.println(logPrefix + " CORP DELIVERED " + delivered);
             if (!delivered.contains(reliableDeliver.getEvent().getEvent())) {
                 Set<DeliverEvent> list = reliableDeliver.getEvent().getList();
                 for (DeliverEvent deliverEvent : list) {
                     KompicsEvent event = deliverEvent.getEvent();
-                    //System.out.println("THE EVENT IS " + event +  "the delvier event is " + deliverEvent + " reliable event is " + reliableDeliver.getEvent());
+                    //System.out.println("THE EVENT IS " + event + "the delvier event is " + deliverEvent + " reliable event is " + reliableDeliver.getEvent().getEvent());
 
                     if (!delivered.contains(event)) {
                         CORBDeliver corbDeliver = new CORBDeliver(deliverEvent);
 
                         trigger(corbDeliver, corbPort);
-                        delivered.add((SimpleEvent) event);
-                        if (!past.contains(event)) {
+                        delivered.add(event);
+                        if (!past.contains(deliverEvent)) {
                             past.add(deliverEvent);
-                            return;
                         }
                     }
                 }
 
-                CORBDeliver corbDeliver = new CORBDeliver(reliableDeliver.getEvent());
-                corbDeliver.setList(reliableDeliver.getList());
+                //Is this part okey, it will remove the double
+                if (!delivered.contains(reliableDeliver.getEvent().getEvent())) {
 
-                trigger(corbDeliver, corbPort);
-                delivered.add(reliableDeliver.getEvent().getEvent());
+                    CORBDeliver corbDeliver = new CORBDeliver(reliableDeliver.getEvent());
+                    corbDeliver.setList(reliableDeliver.getList());
 
-                if (!past.contains(reliableDeliver)) {
-                    past.add(reliableDeliver.getEvent());
+                    trigger(corbDeliver, corbPort);
+                    delivered.add(reliableDeliver.getEvent().getEvent());
+
+                    if (!past.contains(reliableDeliver)) {
+                        past.add(reliableDeliver.getEvent());
+                    }
+
                 }
-
             }
 
         }

@@ -17,13 +17,17 @@
  */
 package se.kth.app;
 
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.kth.app.CORB.CBroadcast;
-import se.kth.app.CORB.CORB;
 import se.kth.app.CORB.CORBDeliver;
 import se.kth.app.CORB.CORBPort;
+import se.kth.app.CRDT.GSet;
+import se.kth.app.CRDT.SuperSet;
+import se.kth.app.Utility.AddEvent;
+import se.kth.app.Utility.DeliverEvent;
+import se.kth.app.Utility.RemoveEvent;
+import se.kth.app.sim.SimpleEvent;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 
@@ -33,9 +37,6 @@ import se.sics.ktoolbox.croupier.CroupierPort;
 import se.sics.ktoolbox.util.identifiable.Identifier;
 import se.sics.ktoolbox.util.network.KAddress;
 import se.sics.ktoolbox.util.network.KContentMsg;
-import se.sics.ktoolbox.util.network.KHeader;
-import se.sics.ktoolbox.util.network.basic.BasicContentMsg;
-import se.sics.ktoolbox.util.network.basic.BasicHeader;
 
 /**
  * @author Alex Ormenisan <aaor@kth.se>
@@ -54,21 +55,27 @@ public class AppComp extends ComponentDefinition {
 
   //**************************************************************************
   private KAddress selfAdr;
+  private SuperSet dataSet;
 
   public AppComp(Init init) {
     selfAdr = init.selfAdr;
     logPrefix = "<nid:" + selfAdr.getId() + ">";
     LOG.info("{}initiating...", logPrefix);
 
+    dataSet = new GSet();
+
     subscribe(handleStart, control);
     subscribe(handleDeliver, corbPortPositive);
     subscribe(simpleEventHandler, networkPort);
+    subscribe(addEventHandler, networkPort);
+    subscribe(removeEventHandler, networkPort);
   }
 
   Handler handleStart = new Handler<Start>() {
     @Override
     public void handle(Start event) {
       LOG.info("{}starting...", logPrefix);
+
     }
   };
 
@@ -77,7 +84,33 @@ public class AppComp extends ComponentDefinition {
     @Override
     public void handle(CORBDeliver corbDeliver) {
 
-      LOG.info("{} received {} from {} ", logPrefix, corbDeliver.getEvent().getEvent().getTextMessage(), corbDeliver.getEvent().getSelfAdr());
+      //System.out.println("Getting event " + corbDeliver.getEvent().getEvent());
+
+      if (corbDeliver.getEvent().getEvent() instanceof SimpleEvent){
+
+        SimpleEvent simpleEvent = (SimpleEvent) corbDeliver.getEvent().getEvent();
+
+        LOG.info("{} received {} from {} ", logPrefix, simpleEvent.getTextMessage(), corbDeliver.getEvent().getSelfAdr());
+
+      }
+      else if (corbDeliver.getEvent().getEvent() instanceof AddEvent){
+
+        AddEvent addEvent = (AddEvent) corbDeliver.getEvent().getEvent();
+        LOG.info("{} received {} from {} ", logPrefix, addEvent.getObject(), corbDeliver.getEvent().getSelfAdr());
+
+      }
+
+      else if (corbDeliver.getEvent().getEvent() instanceof RemoveEvent){
+
+        RemoveEvent removeEvent = (RemoveEvent) corbDeliver.getEvent().getEvent();
+        LOG.info("{} received {} from {} ", logPrefix, removeEvent.getObject(), corbDeliver.getEvent().getSelfAdr());
+
+      }
+
+      else{
+        LOG.info("{} received something not matching ", logPrefix);
+
+      }
 
       //SimpleEvent simpleEvent = (SimpleEvent) corbDeliver.getEvent();
 
@@ -88,7 +121,34 @@ public class AppComp extends ComponentDefinition {
   ClassMatchedHandler<CBroadcast, KContentMsg<?, ?, CBroadcast>> simpleEventHandler = new ClassMatchedHandler<CBroadcast, KContentMsg<?, ?, CBroadcast>>() {
     @Override
     public void handle(CBroadcast cBroadcast, KContentMsg kContentMsg) {
-      LOG.info("SENDING SIMPLE");
+      LOG.info("SENDING " + cBroadcast.getEvent().getEvent());
+
+      trigger(cBroadcast, corbPortPositive);
+    }
+  };
+
+  ClassMatchedHandler<AddEvent, KContentMsg<?, ?, AddEvent>> addEventHandler = new ClassMatchedHandler<AddEvent, KContentMsg<?, ?, AddEvent>>() {
+    @Override
+    public void handle(AddEvent addEvent, KContentMsg kContentMsg) {
+      //LOG.info("SENDING SIMPLE");
+
+      DeliverEvent deliverEvent = new DeliverEvent(addEvent, selfAdr);
+
+      CBroadcast cBroadcast = new CBroadcast(deliverEvent);
+
+      trigger(cBroadcast, corbPortPositive);
+    }
+  };
+
+  ClassMatchedHandler<RemoveEvent, KContentMsg<?, ?, RemoveEvent>> removeEventHandler = new ClassMatchedHandler<RemoveEvent, KContentMsg<?, ?, RemoveEvent>>() {
+    @Override
+    public void handle(RemoveEvent removeEvent, KContentMsg kContentMsg) {
+      //LOG.info("SENDING SIMPLE");
+
+
+      DeliverEvent deliverEvent = new DeliverEvent(removeEvent, selfAdr);
+
+      CBroadcast cBroadcast = new CBroadcast(deliverEvent);
 
       trigger(cBroadcast, corbPortPositive);
     }

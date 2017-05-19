@@ -14,7 +14,7 @@ public class DeliverEvent implements KompicsEvent, Serializable {
 
     private KAddress selfAdr;
 
-    private SimpleEvent event;
+    private KompicsEvent event;
 
     private Set<DeliverEvent> list;
 
@@ -27,11 +27,11 @@ public class DeliverEvent implements KompicsEvent, Serializable {
     }
 
 
-    public SimpleEvent getEvent() {
+    public KompicsEvent getEvent() {
         return event;
     }
 
-    public DeliverEvent(SimpleEvent event, KAddress address) {
+    public DeliverEvent(KompicsEvent event, KAddress address) {
         this.event = event;
         this.selfAdr = address;
     }

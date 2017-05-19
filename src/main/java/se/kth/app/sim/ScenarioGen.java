@@ -96,8 +96,8 @@ public class ScenarioGen {
             final KAddress target;
 
             {
-                String selfIp = "193.0.0." + integer;
-                selfAdr = ScenarioSetup.getNodeAdr(selfIp,integer);
+                String selfIp = "193.0.0.0";
+                selfAdr = ScenarioSetup.getNodeAdr(selfIp,0);
 
                 String targetIp = "193.0.0.2";
                 target = ScenarioSetup.getNodeAdr(targetIp, integer);
