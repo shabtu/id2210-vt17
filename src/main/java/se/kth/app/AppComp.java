@@ -17,16 +17,21 @@
  */
 package se.kth.app;
 
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.tools.corba.se.idl.constExpr.Or;
+import org.apache.commons.math3.analysis.function.Add;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.kth.app.CORB.CBroadcast;
 import se.kth.app.CORB.CORBDeliver;
 import se.kth.app.CORB.CORBPort;
 import se.kth.app.CRDT.GSet;
+import se.kth.app.CRDT.ORSet;
 import se.kth.app.CRDT.SuperSet;
 import se.kth.app.CRDT.TwoPSet;
 import se.kth.app.Utility.AddEvent;
 import se.kth.app.Utility.DeliverEvent;
+import se.kth.app.Utility.OREvent;
 import se.kth.app.Utility.RemoveEvent;
 import se.kth.app.sim.SimpleEvent;
 import se.sics.kompics.*;
@@ -38,6 +43,9 @@ import se.sics.ktoolbox.croupier.CroupierPort;
 import se.sics.ktoolbox.util.identifiable.Identifier;
 import se.sics.ktoolbox.util.network.KAddress;
 import se.sics.ktoolbox.util.network.KContentMsg;
+
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author Alex Ormenisan <aaor@kth.se>
@@ -145,13 +153,13 @@ public class AppComp extends ComponentDefinition {
   ClassMatchedHandler<AddEvent, KContentMsg<?, ?, AddEvent>> addEventHandler = new ClassMatchedHandler<AddEvent, KContentMsg<?, ?, AddEvent>>() {
     @Override
     public void handle(AddEvent addEvent, KContentMsg kContentMsg) {
-      //LOG.info("SENDING SIMPLE");
+
+      addEvent = handleAddEvent(addEvent);
 
       DeliverEvent deliverEvent = new DeliverEvent(addEvent, selfAdr);
 
       CBroadcast cBroadcast = new CBroadcast(deliverEvent);
       
-      handleAddEvent(addEvent);
 
       trigger(cBroadcast, corbPortPositive);
     }
@@ -160,20 +168,21 @@ public class AppComp extends ComponentDefinition {
   ClassMatchedHandler<RemoveEvent, KContentMsg<?, ?, RemoveEvent>> removeEventHandler = new ClassMatchedHandler<RemoveEvent, KContentMsg<?, ?, RemoveEvent>>() {
     @Override
     public void handle(RemoveEvent removeEvent, KContentMsg kContentMsg) {
-      //LOG.info("SENDING SIMPLE");
 
+
+      removeEvent = handleRemoveEvent(removeEvent);
 
       DeliverEvent deliverEvent = new DeliverEvent(removeEvent, selfAdr);
 
       CBroadcast cBroadcast = new CBroadcast(deliverEvent);
 
-      handleRemoveEvent(removeEvent);
 
       trigger(cBroadcast, corbPortPositive);
     }
   };
 
-  private void handleRemoveEvent(RemoveEvent removeEvent) {
+
+  private RemoveEvent handleRemoveEvent(RemoveEvent removeEvent) {
     String results = "";
 
     LOG.info(logPrefix + " got remove event " + removeEvent.getObject().toString());
@@ -184,13 +193,38 @@ public class AppComp extends ComponentDefinition {
       printTomb();
 
     }
+    else if(dataSet instanceof ORSet){
+
+      OREvent orEvent = (OREvent) removeEvent.getObject();
+
+      dataSet = ((ORSet) dataSet);
+
+      LOG.info(logPrefix +  " got element " + orEvent.getElement() + " uuid " + orEvent.getID());
+      if (orEvent.getSet() == null) {
+
+        if (((ORSet) dataSet).queryLookup((orEvent))){
+
+          orEvent = (OREvent) ((ORSet) dataSet).updateRemove(orEvent);
+
+        }
+
+      }
+      else{
+        ((ORSet) dataSet).updateRemoveDownstream(orEvent);
+
+      }
+
+      results = ((ORSet) dataSet).printORSet();
+
+
+    }
     else {
 
     }
 
     LOG.info(logPrefix + " my dataset contains after remove " + results);
 
-
+    return removeEvent;
 
   }
 
@@ -200,7 +234,7 @@ public class AppComp extends ComponentDefinition {
   }
 
 
-  private void handleAddEvent(AddEvent addEvent) {
+  private AddEvent handleAddEvent(AddEvent addEvent) {
     LOG.info(logPrefix + " got add event " + addEvent.getObject().toString());
 
     String results = "";
@@ -216,12 +250,34 @@ public class AppComp extends ComponentDefinition {
       results = ((TwoPSet) dataSet).printStore();
       printTomb();
     }
+    else if (dataSet instanceof ORSet){
+
+      OREvent orEvent = (OREvent) addEvent.getObject();
+
+      LOG.info(logPrefix +  " got element " + orEvent.getElement() + " uuid " + orEvent.getID());
+      if (orEvent.getID() == null) {
+        UUID uuid = ((ORSet) dataSet).createID();
+        orEvent.setID(uuid);
+
+        ((ORSet) dataSet).updateAdd(orEvent);
+      }
+      else{
+        ((ORSet) dataSet).updateAdd(orEvent);
+
+      }
+
+      results = ((ORSet) dataSet).printORSet();
+
+    }
     else{
 
+      LOG.info("No matching class");
     }
 
 
     LOG.info(logPrefix + " my dataset contains after add" + results);
+
+    return addEvent;
   }
 
 

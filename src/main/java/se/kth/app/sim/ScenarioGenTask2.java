@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Random;
 
 import se.kth.app.CRDT.GSet;
+import se.kth.app.CRDT.ORSet;
 import se.kth.app.CRDT.TwoPSet;
 import se.kth.sim.compatibility.SimNodeIdExtractor;
 import se.kth.system.HostMngrComp;
@@ -112,12 +113,12 @@ public class ScenarioGenTask2 {
 
                 @Override
                 public Class getComponentDefinition() {
-                    return TestComponent.class;
+                    return TestComponentTask2.class;
                 }
 
                 @Override
-                public TestComponent.Init getComponentInit() {
-                    return new TestComponent.Init(selfAdr, target, integer);
+                public TestComponentTask2.Init getComponentInit() {
+                    return new TestComponentTask2.Init(selfAdr, target, integer);
                 }
             };
         }
@@ -171,7 +172,7 @@ public class ScenarioGenTask2 {
 
                 @Override
                 public HostMngrComp.Init getComponentInit() {
-                    return new HostMngrComp.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId, TwoPSet.class.getName());
+                    return new HostMngrComp.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId, ORSet.class.getName());
                 }
 
                 @Override
@@ -235,7 +236,7 @@ public class ScenarioGenTask2 {
                 StochasticProcess startTest = new StochasticProcess() {
                     {
                         eventInterArrivalTime(constant(1000));
-                        raise(1, testOp, new IntegerUniformDistribution(4,6, new Random(seed2)));
+                        raise(1, testOp, new IntegerUniformDistribution(1,3, new Random(seed2)));
                     }
                 };
 
@@ -255,21 +256,19 @@ public class ScenarioGenTask2 {
                 systemSetup.start();
                 startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
                 startPeers.startAfterTerminationOf(1000, startBootstrapServer);
-                startPeersToKill.startAfterTerminationOf(1000, startPeers);
+                //startPeersToKill.startAfterTerminationOf(1000, startPeers);
 
-                killNode.startAfterTerminationOf(1000, startPeersToKill);
+                //killNode.startAfterTerminationOf(1000, startPeersToKill);
 
-                startTest.startAfterTerminationOf(1000, startPeersToKill);
+                startTest.startAfterTerminationOf(1000, startPeers);
 
-                reviveNode.startAfterTerminationOf(5000, startTest);
+                //reviveNode.startAfterTerminationOf(5000, startTest);
 
-                startTestSET.startAfterTerminationOf(2000, reviveNode);
-                startTestSETagain.startAfterTerminationOf(2000, startTestSET);
+                //startTestSET.startAfterTerminationOf(2000, startTest);
+                //startTestSETagain.startAfterTerminationOf(2000, startTestSET);
 
-                //startTest.startAfterTerminationOf(1000, reviveNode);
 
-                terminateAfterTerminationOf(1000*1000, startTestSETagain);
-                //startTest.startAfterTerminationOf(1000, killNode);
+                terminateAfterTerminationOf(1000*1000, startTest);
             }
         };
 

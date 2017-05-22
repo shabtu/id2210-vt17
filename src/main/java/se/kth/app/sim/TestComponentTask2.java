@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import se.kth.app.CORB.CBroadcast;
 import se.kth.app.Utility.AddEvent;
 import se.kth.app.Utility.DeliverEvent;
+import se.kth.app.Utility.OREvent;
 import se.kth.app.Utility.RemoveEvent;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
@@ -31,6 +32,10 @@ import se.sics.ktoolbox.util.network.KContentMsg;
 import se.sics.ktoolbox.util.network.KHeader;
 import se.sics.ktoolbox.util.network.basic.BasicContentMsg;
 import se.sics.ktoolbox.util.network.basic.BasicHeader;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Alex Ormenisan <aaor@kth.se>
@@ -59,6 +64,8 @@ public class TestComponentTask2 extends ComponentDefinition {
     Handler<Start> startHandler = new Handler<Start>() {
         @Override
         public void handle(Start start) {
+
+            /*
             switch (test) {
                 case 1:
                     sendGSet();
@@ -66,7 +73,9 @@ public class TestComponentTask2 extends ComponentDefinition {
                 case 2:
                     sendTwoPSet();
                     break;
-            }
+            }*/
+
+            sendORSet();
 
             //sendSimpleEvent();
 
@@ -121,17 +130,32 @@ public class TestComponentTask2 extends ComponentDefinition {
         KContentMsg contentMsg = new BasicContentMsg(header, addEvent);
         trigger(contentMsg, networkPort);
     }
-    private void sendSimpleEvent() {
+
+    private void sendORSet(){
+
+        OREvent orEvent = new OREvent("Apa0", null);
+
+        AddEvent addEvent = new AddEvent(orEvent);
+
+        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+        KContentMsg contentMsg = new BasicContentMsg(header, addEvent);
+
+        trigger(contentMsg, networkPort);
 
         for (int i = 0; i < 3; i++) {
 
-            CBroadcast cBroadcast = new CBroadcast(new DeliverEvent(new SimpleEvent("The important event" + i), selfAdr));
+        orEvent = new OREvent("Apa" + i, null);
 
-            KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
-            KContentMsg contentMsg = new BasicContentMsg(header, cBroadcast);
+        addEvent = new AddEvent(orEvent);
+
+        header = new BasicHeader(selfAdr, target, Transport.UDP);
+        contentMsg = new BasicContentMsg(header, addEvent);
+
             trigger(contentMsg, networkPort);
         }
     }
+
+
 
     public static class Init extends se.sics.kompics.Init<TestComponent> {
 
