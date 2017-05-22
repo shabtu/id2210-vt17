@@ -19,6 +19,7 @@ package se.kth.system;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.kth.app.CRDT.SuperSet;
 import se.kth.app.GBEB.GBEB;
 import se.kth.app.GBEB.GBEBPort;
 import se.kth.app.mngr.AppMngrComp;
@@ -50,6 +51,7 @@ public class HostMngrComp extends ComponentDefinition {
     private KAddress selfAdr;
     private KAddress bootstrapServer;
     private OverlayId croupierId;
+    private String superSet;
     //***************************INTERNAL_STATE*********************************
     private Component bootstrapClientComp;
     private Component overlayMngrComp;
@@ -62,6 +64,7 @@ public class HostMngrComp extends ComponentDefinition {
 
         bootstrapServer = init.bootstrapServer;
         croupierId = init.croupierId;
+        superSet = init.superSet;
 
         subscribe(handleStart, control);
     }
@@ -96,7 +99,7 @@ public class HostMngrComp extends ComponentDefinition {
     private void connectApp() {
         AppMngrComp.ExtPort extPorts = new AppMngrComp.ExtPort(timerPort, networkPort,
                 overlayMngrComp.getPositive(CroupierPort.class), overlayMngrComp.getNegative(OverlayViewUpdatePort.class));
-        appMngrComp = create(AppMngrComp.class, new AppMngrComp.Init(extPorts, selfAdr, croupierId));
+        appMngrComp = create(AppMngrComp.class, new AppMngrComp.Init(extPorts, selfAdr, croupierId, superSet));
 
         connect(appMngrComp.getNegative(OverlayMngrPort.class), overlayMngrComp.getPositive(OverlayMngrPort.class), Channel.TWO_WAY);
     }
@@ -106,11 +109,13 @@ public class HostMngrComp extends ComponentDefinition {
         public final KAddress selfAdr;
         public final KAddress bootstrapServer;
         public final OverlayId croupierId;
+        public final String superSet;
 
-        public Init(KAddress selfAdr, KAddress bootstrapServer, OverlayId croupierId) {
+        public Init(KAddress selfAdr, KAddress bootstrapServer, OverlayId croupierId, String superSet) {
             this.selfAdr = selfAdr;
             this.bootstrapServer = bootstrapServer;
             this.croupierId = croupierId;
+            this.superSet = superSet;
         }
     }
 }

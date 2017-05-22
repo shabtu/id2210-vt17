@@ -35,7 +35,7 @@ import se.sics.ktoolbox.util.network.basic.BasicHeader;
 /**
  * @author Alex Ormenisan <aaor@kth.se>
  */
-public class TestComponent extends ComponentDefinition {
+public class TestComponentTask2 extends ComponentDefinition {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestComponent.class);
     private String logPrefix = " ";
@@ -50,7 +50,7 @@ public class TestComponent extends ComponentDefinition {
     private KAddress selfAdr, target;
 
 
-    public TestComponent(Init init) {
+    public TestComponentTask2(Init init) {
         this.selfAdr = init.selAdr;
         this.target = init.target;
         this.test = init.test;
@@ -59,9 +59,17 @@ public class TestComponent extends ComponentDefinition {
     Handler<Start> startHandler = new Handler<Start>() {
         @Override
         public void handle(Start start) {
+            switch (test) {
+                case 1:
+                    sendGSet();
+                    break;
+                case 2:
+                    sendTwoPSet();
+                    break;
+            }
 
-            sendSimpleEvent();
-            
+            //sendSimpleEvent();
+
             //sendGSet();
             //sendTwoPSet();
 
@@ -69,7 +77,7 @@ public class TestComponent extends ComponentDefinition {
 
 
         }
-        
+
     };
 
     private void sendRemoveEvent() {

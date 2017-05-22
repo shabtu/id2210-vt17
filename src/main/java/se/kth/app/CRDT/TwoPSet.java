@@ -14,6 +14,30 @@ public class TwoPSet extends SuperSet{
 
     }
 
+    public void add(Object object){
+        if (!tombstone.contains(object))
+            store.addObject(object);
+    }
+
+
+    public void remove(Object object){
+        if (store.contains(object)) {
+            tombstone.addObject(object);
+            store.dataSet.remove(object);
+        }
+
+    }
+
+
+    public String printStore(){
+        return store.printStore();
+
+    }
+
+    public String printTombStone(){
+        return tombstone.printStore();
+
+    }
 
 
 

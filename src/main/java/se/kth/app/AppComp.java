@@ -24,6 +24,7 @@ import se.kth.app.CORB.CORBDeliver;
 import se.kth.app.CORB.CORBPort;
 import se.kth.app.CRDT.GSet;
 import se.kth.app.CRDT.SuperSet;
+import se.kth.app.CRDT.TwoPSet;
 import se.kth.app.Utility.AddEvent;
 import se.kth.app.Utility.DeliverEvent;
 import se.kth.app.Utility.RemoveEvent;
@@ -62,7 +63,20 @@ public class AppComp extends ComponentDefinition {
     logPrefix = "<nid:" + selfAdr.getId() + ">";
     LOG.info("{}initiating...", logPrefix);
 
-    dataSet = new GSet();
+    Object typeOfSuperClass = null;
+    try {
+      typeOfSuperClass = Class.forName(init.superSet).newInstance();
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (InstantiationException e) {
+      e.printStackTrace();
+    }
+    dataSet =  (SuperSet) typeOfSuperClass;
+
+    System.out.println("Dataset is" + dataSet.getClass() + "   " + typeOfSuperClass.getClass());
+
 
     subscribe(handleStart, control);
     subscribe(handleDeliver, corbPortPositive);
@@ -96,14 +110,17 @@ public class AppComp extends ComponentDefinition {
       else if (corbDeliver.getEvent().getEvent() instanceof AddEvent){
 
         AddEvent addEvent = (AddEvent) corbDeliver.getEvent().getEvent();
-        LOG.info("{} received {} from {} ", logPrefix, addEvent.getObject(), corbDeliver.getEvent().getSelfAdr());
+        handleAddEvent(addEvent);
+
+        //LOG.info("{} received {} from {} ", logPrefix, addEvent.getObject(), corbDeliver.getEvent().getSelfAdr());
 
       }
 
       else if (corbDeliver.getEvent().getEvent() instanceof RemoveEvent){
 
         RemoveEvent removeEvent = (RemoveEvent) corbDeliver.getEvent().getEvent();
-        LOG.info("{} received {} from {} ", logPrefix, removeEvent.getObject(), corbDeliver.getEvent().getSelfAdr());
+        handleRemoveEvent(removeEvent);
+        //LOG.info("{} received {} from {} ", logPrefix, removeEvent.getObject(), corbDeliver.getEvent().getSelfAdr());
 
       }
 
@@ -112,8 +129,6 @@ public class AppComp extends ComponentDefinition {
 
       }
 
-      //SimpleEvent simpleEvent = (SimpleEvent) corbDeliver.getEvent();
-
 
     }
   };
@@ -121,7 +136,7 @@ public class AppComp extends ComponentDefinition {
   ClassMatchedHandler<CBroadcast, KContentMsg<?, ?, CBroadcast>> simpleEventHandler = new ClassMatchedHandler<CBroadcast, KContentMsg<?, ?, CBroadcast>>() {
     @Override
     public void handle(CBroadcast cBroadcast, KContentMsg kContentMsg) {
-      LOG.info("SENDING " + cBroadcast.getEvent().getEvent());
+      //LOG.info("SENDING " + cBroadcast.getEvent().getEvent());
 
       trigger(cBroadcast, corbPortPositive);
     }
@@ -135,6 +150,8 @@ public class AppComp extends ComponentDefinition {
       DeliverEvent deliverEvent = new DeliverEvent(addEvent, selfAdr);
 
       CBroadcast cBroadcast = new CBroadcast(deliverEvent);
+      
+      handleAddEvent(addEvent);
 
       trigger(cBroadcast, corbPortPositive);
     }
@@ -150,18 +167,75 @@ public class AppComp extends ComponentDefinition {
 
       CBroadcast cBroadcast = new CBroadcast(deliverEvent);
 
+      handleRemoveEvent(removeEvent);
+
       trigger(cBroadcast, corbPortPositive);
     }
   };
+
+  private void handleRemoveEvent(RemoveEvent removeEvent) {
+    String results = "";
+
+    LOG.info(logPrefix + " got remove event " + removeEvent.getObject().toString());
+    if (dataSet instanceof TwoPSet){
+      ((TwoPSet)dataSet).remove(removeEvent.getObject());
+
+      results = ((TwoPSet) dataSet).printStore();
+      printTomb();
+
+    }
+    else {
+
+    }
+
+    LOG.info(logPrefix + " my dataset contains after remove " + results);
+
+
+
+  }
+
+  private void printTomb() {
+
+    LOG.info(logPrefix + " my tombstone contains " + ((TwoPSet)dataSet).printTombStone());
+  }
+
+
+  private void handleAddEvent(AddEvent addEvent) {
+    LOG.info(logPrefix + " got add event " + addEvent.getObject().toString());
+
+    String results = "";
+
+    if (dataSet instanceof GSet) {
+      ((GSet)dataSet).addObject(addEvent.getObject());
+      results = dataSet.printStore();
+
+
+    }
+    else if (dataSet instanceof TwoPSet){
+      ((TwoPSet) dataSet).add(addEvent.getObject());
+      results = ((TwoPSet) dataSet).printStore();
+      printTomb();
+    }
+    else{
+
+    }
+
+
+    LOG.info(logPrefix + " my dataset contains after add" + results);
+  }
+
+
 
   public static class Init extends se.sics.kompics.Init<AppComp> {
 
     public final KAddress selfAdr;
     public final Identifier gradientOId;
+    public final String superSet;
 
-    public Init(KAddress selfAdr, Identifier gradientOId) {
+    public Init(KAddress selfAdr, Identifier gradientOId, String superSet) {
       this.selfAdr = selfAdr;
       this.gradientOId = gradientOId;
+      this.superSet = superSet;
     }
   }
 }

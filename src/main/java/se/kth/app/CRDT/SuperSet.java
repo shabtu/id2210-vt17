@@ -16,12 +16,8 @@ public abstract class SuperSet {
         this.dataSet = new HashSet<>();
     }
 
-    public boolean addObject(Object object){
-        if (!dataSet.contains(object)){
-            dataSet.add(object);
-            return true;
-        }
-        else return false;
+    public void addObject(Object object){
+        dataSet.add(object);
     }
 
 
@@ -29,10 +25,15 @@ public abstract class SuperSet {
         StringBuilder stringBuilder = new StringBuilder();
         int counter = 1;
         for (Object object : dataSet){
-            stringBuilder.append(counter + ": " + object.toString() + " \n");
+            stringBuilder.append("\n" + counter + ": " + object.toString());
             counter++;
         }
         return stringBuilder.toString();
+    }
+
+    public boolean contains(Object object){
+
+        return dataSet.contains(object);
     }
 
 }

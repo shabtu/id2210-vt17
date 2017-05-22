@@ -47,7 +47,7 @@ import se.sics.ktoolbox.util.network.KAddress;
 /**
  * @author Alex Ormenisan <aaor@kth.se>
  */
-public class ScenarioGen {
+public class ScenarioGenTask2 {
 
 
     static Operation<SetupEvent> systemSetupOp = new Operation<SetupEvent>() {
@@ -263,11 +263,13 @@ public class ScenarioGen {
 
                 reviveNode.startAfterTerminationOf(5000, startTest);
 
+                startTestSET.startAfterTerminationOf(2000, reviveNode);
+                startTestSETagain.startAfterTerminationOf(2000, startTestSET);
 
                 //startTest.startAfterTerminationOf(1000, reviveNode);
 
-                terminateAfterTerminationOf(1000*1000, reviveNode);
-               //startTest.startAfterTerminationOf(1000, killNode);
+                terminateAfterTerminationOf(1000*1000, startTestSETagain);
+                //startTest.startAfterTerminationOf(1000, killNode);
             }
         };
 

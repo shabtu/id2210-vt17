@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.kth.app.CORB.CORB;
 import se.kth.app.CORB.CORBPort;
+import se.kth.app.CRDT.SuperSet;
 import se.kth.app.EagerRB.EagerRB;
 import se.kth.app.EagerRB.EagerRBPort;
 import se.kth.app.GBEB.GBEB;
@@ -52,6 +53,7 @@ public class AppMngrComp extends ComponentDefinition {
   private ExtPort extPorts;
   private KAddress selfAdr;
   private OverlayId croupierId;
+  private String superSet;
   //***************************INTERNAL_STATE*********************************
   private Component appComp;
   private Component gbebComp;
@@ -68,6 +70,7 @@ public class AppMngrComp extends ComponentDefinition {
 
     extPorts = init.extPorts;
     croupierId = init.croupierOId;
+    superSet = init.superSet;
 
     subscribe(handleStart, control);
     subscribe(handleCroupierConnected, omngrPort);
@@ -105,7 +108,7 @@ public class AppMngrComp extends ComponentDefinition {
   };
 
   private void connectAppComp() {
-    appComp = create(AppComp.class, new AppComp.Init(selfAdr, croupierId));
+    appComp = create(AppComp.class, new AppComp.Init(selfAdr, croupierId, superSet));
     //broadcast = create(BroadcastTest.class, new BroadcastTest.Init(selfAdr));
 
     connect(appComp.getNegative(Timer.class), extPorts.timerPort, Channel.TWO_WAY);
@@ -134,11 +137,13 @@ public class AppMngrComp extends ComponentDefinition {
     public final ExtPort extPorts;
     public final KAddress selfAdr;
     public final OverlayId croupierOId;
+    public final String superSet;
 
-    public Init(ExtPort extPorts, KAddress selfAdr, OverlayId croupierOId) {
+    public Init(ExtPort extPorts, KAddress selfAdr, OverlayId croupierOId, String superSet) {
       this.extPorts = extPorts;
       this.selfAdr = selfAdr;
       this.croupierOId = croupierOId;
+      this.superSet = superSet;
     }
   }
 
