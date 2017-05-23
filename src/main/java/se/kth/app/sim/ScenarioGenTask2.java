@@ -260,6 +260,7 @@ public class ScenarioGenTask2 {
 
                 //killNode.startAfterTerminationOf(1000, startPeersToKill);
 
+                /**Neeed to test the ORSET**/
                 startTestSET.startAfterTerminationOf(1000, startPeers);
 
                 //reviveNode.startAfterTerminationOf(5000, startTest);
