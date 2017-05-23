@@ -64,30 +64,46 @@ public class TestComponentTask2 extends ComponentDefinition {
     Handler<Start> startHandler = new Handler<Start>() {
         @Override
         public void handle(Start start) {
-
-            /*
-            switch (test) {
-                case 1:
-                    sendGSet();
-                    break;
-                case 2:
-                    sendTwoPSet();
-                    break;
-            }*/
-
-            sendORSet();
-
             //sendSimpleEvent();
-
-            //sendGSet();
-            //sendTwoPSet();
-
             //sendRemoveEvent();
 
+
+            /**Test for TWOPSET**/
+            //testTwoPSet();
+
+            /**Test for GSET**/
+            //sendGSet();
+
+
+            /**Test for ORSET**/
+            testORSet();
 
         }
 
     };
+
+    private void testORSet() {
+        switch (test) {
+            case 1:
+                sendORSet();
+                break;
+            case 2:
+                sendORRemoveSet();
+                break;
+        }
+    }
+
+
+    private void testTwoPSet(){
+        switch (test) {
+            case 1:
+                sendGSet();
+                break;
+            case 2:
+                sendTwoPSet();
+                break;
+        }
+    }
 
     private void sendRemoveEvent() {
 
@@ -152,7 +168,21 @@ public class TestComponentTask2 extends ComponentDefinition {
         contentMsg = new BasicContentMsg(header, addEvent);
 
             trigger(contentMsg, networkPort);
+
         }
+    }
+
+    private void sendORRemoveSet() {
+
+        OREvent orEvent = new OREvent("Apa0", null);
+
+        RemoveEvent removeEvent = new RemoveEvent(orEvent);
+
+        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+        KContentMsg contentMsg = new BasicContentMsg(header, removeEvent);
+
+        trigger(contentMsg, networkPort);
+
     }
 
 

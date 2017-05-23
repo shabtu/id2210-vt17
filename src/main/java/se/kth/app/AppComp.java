@@ -20,6 +20,7 @@ package se.kth.app;
 import com.sun.org.apache.regexp.internal.RE;
 import com.sun.tools.corba.se.idl.constExpr.Or;
 import org.apache.commons.math3.analysis.function.Add;
+import org.apache.commons.math3.analysis.function.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.kth.app.CORB.CBroadcast;
@@ -199,17 +200,21 @@ public class AppComp extends ComponentDefinition {
 
       dataSet = ((ORSet) dataSet);
 
-      LOG.info(logPrefix +  " got element " + orEvent.getElement() + " uuid " + orEvent.getID());
-      if (orEvent.getSet() == null) {
+      LOG.info(logPrefix +  " got element " + orEvent.getElement() + " uuid " + orEvent.getID() + " list " + orEvent.getSet() + " size " + orEvent.getSet().size() + " empty " + orEvent.getSet().isEmpty());
+      LOG.info(logPrefix + " my dataset contains before remove " + ((ORSet) dataSet).printORSet());
+
+      if (orEvent.getSet().isEmpty()) {
 
         if (((ORSet) dataSet).queryLookup((orEvent))){
-
+          LOG.info("SOURCE ");
           orEvent = (OREvent) ((ORSet) dataSet).updateRemove(orEvent);
 
         }
 
       }
       else{
+        LOG.info("DOWNSTREAM ");
+
         ((ORSet) dataSet).updateRemoveDownstream(orEvent);
 
       }

@@ -242,7 +242,7 @@ public class ScenarioGenTask2 {
 
                 StochasticProcess startTestSET = new StochasticProcess() {
                     {
-                        eventInterArrivalTime(constant(1000));
+                        eventInterArrivalTime(constant(5000));
                         raise(2, testOp, new BasicIntSequentialDistribution(1));
                     }
                 };
@@ -260,7 +260,7 @@ public class ScenarioGenTask2 {
 
                 //killNode.startAfterTerminationOf(1000, startPeersToKill);
 
-                startTest.startAfterTerminationOf(1000, startPeers);
+                startTestSET.startAfterTerminationOf(1000, startPeers);
 
                 //reviveNode.startAfterTerminationOf(5000, startTest);
 
@@ -268,7 +268,7 @@ public class ScenarioGenTask2 {
                 //startTestSETagain.startAfterTerminationOf(2000, startTestSET);
 
 
-                terminateAfterTerminationOf(1000*1000, startTest);
+                terminateAfterTerminationOf(1000*1000, startTestSET);
             }
         };
 

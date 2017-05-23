@@ -55,10 +55,29 @@ public class ORSet extends SuperSet {
 
             tempList = dataSet.get(tempElement);
             orEvent.setSet(tempList);
+            dataSet.remove(tempElement);
 
         }
 
         return element;
+    }
+
+    public void updateRemoveDownstream(OREvent orEvent) {
+
+        Set<UUID> tempOrEvent = orEvent.getSet();
+        Set<UUID> tempORSet = dataSet.get(orEvent.getElement());
+
+        System.out.println("I ORSET " + tempOrEvent + " and " + tempORSet);
+
+        if (!tempOrEvent.isEmpty() && !tempORSet.isEmpty()){
+            Set<UUID> newList = Sets.symmetricDifference(tempOrEvent, tempORSet);
+
+            if (newList.isEmpty()){
+                dataSet.remove(orEvent.getElement());
+            } else {
+                dataSet.put(orEvent.getElement(), newList);
+            }
+        }
     }
 
     public boolean queryLookup(Object element){
@@ -92,14 +111,5 @@ public class ORSet extends SuperSet {
 
     }
 
-    public void updateRemoveDownstream(OREvent orEvent) {
 
-        Set<UUID> newList = Sets.symmetricDifference(orEvent.getSet(), dataSet.get(orEvent.getElement()));
-
-        if (newList.isEmpty()){
-            dataSet.remove(orEvent.getElement());
-        } else {
-            dataSet.put(orEvent.getElement(), newList);
-        }
-    }
 }
