@@ -25,6 +25,7 @@ import java.util.Random;
 import se.kth.app.CRDT.GSet;
 import se.kth.app.CRDT.ORSet;
 import se.kth.app.CRDT.TwoPSet;
+import se.kth.app.CRDT.TwoPTwoPGraph;
 import se.kth.sim.compatibility.SimNodeIdExtractor;
 import se.kth.system.HostMngrComp;
 import se.sics.kompics.ComponentDefinition;
@@ -172,7 +173,7 @@ public class ScenarioGenTask2 {
 
                 @Override
                 public HostMngrComp.Init getComponentInit() {
-                    return new HostMngrComp.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId, ORSet.class.getName());
+                    return new HostMngrComp.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId, TwoPTwoPGraph.class.getName());
                 }
 
                 @Override
@@ -243,7 +244,7 @@ public class ScenarioGenTask2 {
                 StochasticProcess startTestSET = new StochasticProcess() {
                     {
                         eventInterArrivalTime(constant(5000));
-                        raise(2, testOp, new BasicIntSequentialDistribution(1));
+                        raise(4, testOp, new BasicIntSequentialDistribution(1));
                     }
                 };
                 StochasticProcess startTestSETagain = new StochasticProcess() {
@@ -260,16 +261,16 @@ public class ScenarioGenTask2 {
 
                 //killNode.startAfterTerminationOf(1000, startPeersToKill);
 
-                /**Neeed to test the ORSET**/
-                startTestSET.startAfterTerminationOf(1000, startPeers);
-
                 //reviveNode.startAfterTerminationOf(5000, startTest);
 
                 //startTestSET.startAfterTerminationOf(2000, startTest);
                 //startTestSETagain.startAfterTerminationOf(2000, startTestSET);
 
+                /**Neeed to test the ORSET**/
+                startTestSET.startAfterTerminationOf(1000, startPeers);
 
-                terminateAfterTerminationOf(1000*1000, startTestSET);
+
+                terminateAfterTerminationOf(10000*100000, startTestSET);
             }
         };
 

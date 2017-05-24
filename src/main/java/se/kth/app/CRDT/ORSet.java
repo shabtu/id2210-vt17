@@ -66,16 +66,26 @@ public class ORSet extends SuperSet {
 
         Set<UUID> tempOrEvent = orEvent.getSet();
         Set<UUID> tempORSet = dataSet.get(orEvent.getElement());
+        Set<UUID> newSet = new HashSet<>();
 
         System.out.println("I ORSET " + tempOrEvent + " and " + tempORSet);
 
         if (!tempOrEvent.isEmpty() && !tempORSet.isEmpty()){
-            Set<UUID> newList = Sets.symmetricDifference(tempOrEvent, tempORSet);
 
-            if (newList.isEmpty()){
+            /**Should only remove those entries that does match, does that has been delivered, causal
+             * tells that you can not remove something that has not been delivered**/
+            for (UUID id : tempOrEvent){
+                if (tempORSet.contains(id)){
+                    newSet.add(id);
+                }
+            }
+
+            tempORSet.removeAll(newSet);
+
+            if (tempORSet.isEmpty()){
                 dataSet.remove(orEvent.getElement());
             } else {
-                dataSet.put(orEvent.getElement(), newList);
+                dataSet.put(orEvent.getElement(), tempORSet);
             }
         }
     }

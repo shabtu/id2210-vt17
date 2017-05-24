@@ -16,13 +16,11 @@ package se.kth.app.sim;/*
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+import com.sun.org.apache.regexp.internal.RE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.kth.app.CORB.CBroadcast;
-import se.kth.app.Utility.AddEvent;
-import se.kth.app.Utility.DeliverEvent;
-import se.kth.app.Utility.OREvent;
-import se.kth.app.Utility.RemoveEvent;
+import se.kth.app.Utility.*;
 import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.network.Transport;
@@ -76,11 +74,84 @@ public class TestComponentTask2 extends ComponentDefinition {
 
 
             /**Test for ORSET**/
-            testORSet();
+            //testORSet();
+
+            /**Test for 2P2PGraph**/
+            testGraph();
 
         }
 
     };
+
+    private void testGraph() {
+
+        System.out.println("TEST IS " + test);
+        switch (test) {
+            case 1:
+                sendAddVertex();
+                break;
+            case 2:
+                sendEdge();
+                break;
+            case 3:
+                removeVertex();
+                break;
+            case 4:
+                removeEdge();
+                break;
+        }
+    }
+
+    private void removeEdge() {
+        System.out.println("görs dsdosapjdpaosdja");
+        EdgeEvent edgeEvent = new EdgeEvent(true, 0, 1);
+
+        RemoveEvent removeEvent = new RemoveEvent(edgeEvent);
+
+        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+        KContentMsg contentMsg = new BasicContentMsg(header, removeEvent);
+        trigger(contentMsg, networkPort);
+    }
+
+    private void removeVertex() {
+
+        VertexEvent vertexEvent = new VertexEvent(true, 2);
+
+        RemoveEvent removeEvent = new RemoveEvent(vertexEvent);
+
+        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+        KContentMsg contentMsg = new BasicContentMsg(header, removeEvent);
+        trigger(contentMsg, networkPort);
+
+    }
+
+    private void sendEdge() {
+
+        EdgeEvent edgeEvent = new EdgeEvent(true, 0, 1);
+
+        AddEvent addEvent = new AddEvent(edgeEvent);
+
+        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+        KContentMsg contentMsg = new BasicContentMsg(header, addEvent);
+        trigger(contentMsg, networkPort);
+
+    }
+
+    private void sendAddVertex() {
+
+
+        for (int i = 0; i < 3; i++) {
+
+            VertexEvent vertexEvent = new VertexEvent(true, i);
+
+            AddEvent addEvent = new AddEvent(vertexEvent);
+
+            KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+            KContentMsg contentMsg = new BasicContentMsg(header, addEvent);
+            trigger(contentMsg, networkPort);
+
+        }
+    }
 
     private void testORSet() {
         switch (test) {

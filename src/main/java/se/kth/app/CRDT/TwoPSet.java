@@ -1,5 +1,10 @@
 package se.kth.app.CRDT;
 
+import se.kth.app.Utility.Edge;
+import se.kth.app.Utility.Vertex;
+
+import java.util.Set;
+
 /**
  * Created by tobiaj on 2017-05-18.
  */
@@ -39,6 +44,36 @@ public class TwoPSet extends SuperSet{
 
     }
 
+    public boolean lookUp(Object object){
+
+        if (object instanceof Edge){
+
+            Edge edge = (Edge) object;
+
+            System.out.println("hit i twopset "+ edge);
+
+            if(store.contains(edge) && !tombstone.contains(edge)){
+                return true;
+            }
+            else {
+
+
+                return false;
+            }
+        }
+        else {
+            if (store.contains(object) && !tombstone.contains(object)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public Set<Object> getSet(){
+
+        return store.getDataSet();
+    }
 
 
 }

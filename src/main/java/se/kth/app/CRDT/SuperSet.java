@@ -36,4 +36,10 @@ public abstract class SuperSet {
         return dataSet.contains(object);
     }
 
+
+    public Set<Object> getDataSet(){
+        return dataSet;
+
+    }
+
 }
