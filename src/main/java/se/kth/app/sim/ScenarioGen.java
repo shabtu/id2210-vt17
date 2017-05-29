@@ -101,7 +101,7 @@ public class ScenarioGen {
                 String selfIp = "193.0.0.0";
                 selfAdr = ScenarioSetup.getNodeAdr(selfIp,0);
 
-                String targetIp = "193.0.0.2";
+                String targetIp = "193.0.0.4";
                 target = ScenarioSetup.getNodeAdr(targetIp, integer);
             }
             return new StartNodeEvent() {
@@ -255,6 +255,7 @@ public class ScenarioGen {
                 systemSetup.start();
                 startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
                 startPeers.startAfterTerminationOf(1000, startBootstrapServer);
+
                 startPeersToKill.startAfterTerminationOf(1000, startPeers);
 
                 killNode.startAfterTerminationOf(1000, startPeersToKill);

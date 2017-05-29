@@ -3,7 +3,7 @@ package se.kth.app.CRDT;
 import se.kth.app.Utility.Edge;
 import se.kth.app.Utility.Vertex;
 
-import java.beans.VetoableChangeListener;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -41,22 +41,8 @@ public class TwoPTwoPGraph extends SuperSet{
         if (vertex != null) {
             if (lookupVertex(vertex)) {
 
-                Set<Object> objects = edges.getSet();
-
-                for (Object object : objects){
-
-                    Edge edge = (Edge) object;
-
-                    if (lookupEdge(edge)){
-
-                        if (!vertex.equals(edge.getVertexOne()) || !vertex.equals(edge.getVertexTwo())) {
-
-                            removeVertex(vertex);
-                            return vertex;
-                        }
-
-                    }
-                }
+                removeVertex(vertex);
+                return vertex;
             }
         }
 
@@ -64,21 +50,50 @@ public class TwoPTwoPGraph extends SuperSet{
 
     }
 
+    private void removeEdgesFromVertex(Vertex vertex) {
+        Set<Object> objects = edges.getSet();
+        Set<Object> remove = new HashSet<>();
+
+        System.out.println("edges " + objects   + " size " + objects.size() );
+        for (Object object : objects){
+
+            Edge edge = (Edge) object;
+
+            if (lookupEdge(edge)){
+
+                if (vertex.equals(edge.getVertexOne()) || vertex.equals(edge.getVertexTwo())) {
+                    remove.add(edge);
+                    //removeEdge(edge);
+
+                }
+
+            }
+        }
+        for (Object object : remove){
+            Edge edge = (Edge) object;
+
+            removeEdge(edge);
+        }
+
+    }
+
     public void removeVertex(Vertex vertex){
 
         if (lookupVertex(vertex)){
-            System.out.println("Remove " + vertex);
+            removeEdgesFromVertex(vertex);
             vertecies.remove(vertex);
         }
     }
 
     public void addEdge(Edge edge){
 
-        edges.add(edge);
+        if (lookupVertex(edge.getVertexOne()) && lookupVertex(edge.getVertexTwo())) {
+            edges.add(edge);
+        }
 
     }
 
-    public Edge addEdgeByVerteciesID(int ID_A, int ID_B){
+    public Edge addEdgeByVerticesID(int ID_A, int ID_B){
 
         Vertex vertexA = getVertexbyID(ID_A);
         Vertex vertexB = getVertexbyID(ID_B);
@@ -91,7 +106,8 @@ public class TwoPTwoPGraph extends SuperSet{
 
                 Edge edge = new Edge(stringID, vertexA, vertexB);
 
-                addEdge(edge);
+                edges.add(edge);
+
                 return edge;
 
             }
@@ -115,13 +131,10 @@ public class TwoPTwoPGraph extends SuperSet{
 
                 if ((vertexA.equals(edge.getVertexOne()) || vertexA.equals(edge.getVertexTwo())) && (vertexB.equals(edge.getVertexOne()) || vertexB.equals(edge.getVertexTwo()))) {
 
-                    if (lookupEdge(edge)) {
-                        edges.remove(edge);
-                        return edge;
-                    }
+                    removeEdge(edge);
+                    return edge;
                 }
             }
-
         }
 
         return null;
@@ -129,29 +142,48 @@ public class TwoPTwoPGraph extends SuperSet{
 
     public void removeEdge(Edge edge){
 
-        if (edges.contains(edge)){
-            edges.remove(edge);
+        try {
+
+            if (lookupEdge(edge)) {
+                edges.remove(edge);
+            }
+
+        }
+        catch (NullPointerException e){
+            System.out.println("Already removed");
         }
     }
 
     public boolean lookupEdge(Edge edge){
 
-        if (lookupVertex(edge.getVertexOne()) && lookupVertex(edge.getVertexTwo()) && edges.lookUp(edge)){
-            return true;
+        try{
+
+            if (lookupVertex(edge.getVertexOne()) && lookupVertex(edge.getVertexTwo()) && edges.lookUp(edge)){
+                return true;
+            }
+
         }
-        else{
-            return false;
+        catch (NullPointerException e){
+            System.out.println("Edge does not exist");
         }
+
+        return false;
     }
 
     public boolean lookupVertex(Vertex vertex){
 
-        if (vertecies.lookUp(vertex)){
-            return true;
+
+        try {
+            if (vertecies.lookUp(vertex)) {
+                return true;
+            }
         }
-        else{
-            return false;
+
+        catch (NullPointerException e){
+            System.out.println("Vertex does not exist");
         }
+
+        return false;
     }
 
     public String print2P2PVerteciesStore(){
@@ -159,12 +191,11 @@ public class TwoPTwoPGraph extends SuperSet{
         Set<Object> objects = vertecies.getSet();
         StringBuilder stringBuilder = new StringBuilder();
 
-        //stringBuilder.append("Dataset contains vertecies \n");
-
         for (Object object : objects){
             Vertex vertex = (Vertex) object;
-            stringBuilder.append("Vertex: " + vertex.getId() + " " + vertex + " \n");
-
+            if (vertex !=null) {
+                stringBuilder.append("Vertex: " + vertex.getId() + " " + vertex + " \n");
+            }
         }
         return stringBuilder.toString();
     }
@@ -174,12 +205,11 @@ public class TwoPTwoPGraph extends SuperSet{
         Set<Object> objects = edges.getSet();
         StringBuilder stringBuilder = new StringBuilder();
 
-        //stringBuilder.append("Dataset contains edges \n");
-
         for (Object object : objects){
             Edge edge = (Edge) object;
-            stringBuilder.append("Edge: " + edge.getId() + " connected between vertex: " + edge.getVertexOne().getId() + " and vertex: " + edge.getVertexTwo().getId() +"\n ");
-
+            if (edge != null) {
+                stringBuilder.append("Edge: " + edge.getId() + " connected between vertex: " + edge.getVertexOne().getId() + " and vertex: " + edge.getVertexTwo().getId() + "\n ");
+            }
         }
         return stringBuilder.toString();
 
@@ -198,15 +228,6 @@ public class TwoPTwoPGraph extends SuperSet{
             }
 
         }
-        return null;
-
-
-
-    }
-
-    public Edge getEdgeById(){
-
-
         return null;
 
     }

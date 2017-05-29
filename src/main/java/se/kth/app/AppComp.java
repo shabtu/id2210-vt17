@@ -115,9 +115,13 @@ public class AppComp extends ComponentDefinition {
 
             else if (corbDeliver.getEvent().getEvent() instanceof RemoveEvent){
 
+
+
+
                 RemoveEvent removeEvent = (RemoveEvent) corbDeliver.getEvent().getEvent();
-                handleRemoveEvent(removeEvent);
                 //LOG.info("{} received {} from {} ", logPrefix, removeEvent.getObject(), corbDeliver.getEvent().getSelfAdr());
+
+                handleRemoveEvent(removeEvent);
 
             }
 
@@ -133,7 +137,9 @@ public class AppComp extends ComponentDefinition {
     ClassMatchedHandler<CBroadcast, KContentMsg<?, ?, CBroadcast>> simpleEventHandler = new ClassMatchedHandler<CBroadcast, KContentMsg<?, ?, CBroadcast>>() {
         @Override
         public void handle(CBroadcast cBroadcast, KContentMsg kContentMsg) {
-            //LOG.info("SENDING " + cBroadcast.getEvent().getEvent());
+            SimpleEvent simpleEvent = (SimpleEvent) cBroadcast.getEvent().getEvent();
+
+            LOG.info("{} received {} from {} now broadcasting", logPrefix, simpleEvent.getTextMessage(), cBroadcast.getEvent().getSelfAdr());
 
             trigger(cBroadcast, corbPortPositive);
         }
@@ -158,7 +164,6 @@ public class AppComp extends ComponentDefinition {
         @Override
         public void handle(RemoveEvent removeEvent, KContentMsg kContentMsg) {
 
-            LOG.info("REMOVE EVENT " + removeEvent.getObject());
             removeEvent = handleRemoveEvent(removeEvent);
 
             DeliverEvent deliverEvent = new DeliverEvent(removeEvent, selfAdr);
@@ -212,19 +217,18 @@ public class AppComp extends ComponentDefinition {
 
         else if(dataSet instanceof TwoPTwoPGraph){
 
-            System.out.println("remove event i 2p2pgraph " + removeEvent.getObject());
-
             if (removeEvent.getObject() instanceof VertexEvent){
 
                 removeEvent = handelVertexRemoveEvent(removeEvent);
-                results = ((TwoPTwoPGraph) dataSet).print2P2PVerteciesStore();
+                LOG.info(logPrefix + " contains vertecies after remove \n" + ((TwoPTwoPGraph) dataSet).print2P2PVerteciesStore());
+                LOG.info(logPrefix + " contains edges after remove \n" + ((TwoPTwoPGraph) dataSet).print2P2PEdgesStore());
 
 
             }else if (removeEvent.getObject() instanceof EdgeEvent){
 
-                System.out.println("hit då`??");
                 removeEvent = handleEdgeRemoveEvent(removeEvent);
-                results = ((TwoPTwoPGraph) dataSet).print2P2PEdgesStore();
+                LOG.info(logPrefix + " contains vertecies after remove \n" + ((TwoPTwoPGraph) dataSet).print2P2PVerteciesStore());
+                LOG.info(logPrefix + " contains edges after remove \n" + ((TwoPTwoPGraph) dataSet).print2P2PEdgesStore());
 
 
             }
@@ -289,13 +293,15 @@ public class AppComp extends ComponentDefinition {
             if (addEvent.getObject() instanceof VertexEvent){
 
                 addEvent = handelVertexAddEvent(addEvent);
-                results = ((TwoPTwoPGraph) dataSet).print2P2PVerteciesStore();
+                LOG.info(logPrefix + " contains vertecies after add \n" + ((TwoPTwoPGraph) dataSet).print2P2PVerteciesStore());
+                LOG.info(logPrefix + " contains edges after add \n" + ((TwoPTwoPGraph) dataSet).print2P2PEdgesStore());
 
 
             }else if (addEvent.getObject() instanceof EdgeEvent){
 
                 addEvent = handleEdgeAddEvent(addEvent);
-                results = ((TwoPTwoPGraph) dataSet).print2P2PEdgesStore();
+                LOG.info(logPrefix + " contains vertecies after add \n" + ((TwoPTwoPGraph) dataSet).print2P2PVerteciesStore());
+                LOG.info(logPrefix + " contains edges after add \n" + ((TwoPTwoPGraph) dataSet).print2P2PEdgesStore());
 
 
             }
@@ -324,7 +330,7 @@ public class AppComp extends ComponentDefinition {
         if (edgeEvent.isSource()){
             edgeEvent.setSource(false);
 
-            Edge edge = ((TwoPTwoPGraph) dataSet).addEdgeByVerteciesID(edgeEvent.getVertexA(), edgeEvent.getVertexB());
+            Edge edge = ((TwoPTwoPGraph) dataSet).addEdgeByVerticesID(edgeEvent.getVertexA(), edgeEvent.getVertexB());
 
             edgeEvent.setEdge(edge);
 
@@ -377,10 +383,12 @@ public class AppComp extends ComponentDefinition {
 
             Vertex vertex = ((TwoPTwoPGraph) dataSet).removeVertexByID(vertexEvent.getId());
             vertexEvent.setVertex(vertex);
+
         }
         else{
 
             ((TwoPTwoPGraph) dataSet).removeVertex(vertexEvent.getVertex());
+
         }
         return removeEvent;
     }
@@ -389,23 +397,23 @@ public class AppComp extends ComponentDefinition {
 
         EdgeEvent edgeEvent = (EdgeEvent) removeEvent.getObject();
         dataSet = (TwoPTwoPGraph) dataSet;
-        System.out.println("komer jag hit");
 
         if (edgeEvent.isSource()){
             edgeEvent.setSource(false);
 
-            System.out.println("kommer jag hit");
-
             Edge edge = ((TwoPTwoPGraph) dataSet).removeEdgeByID(edgeEvent.getVertexA(), edgeEvent.getVertexB());
 
             edgeEvent.setEdge(edge);
+
         }
 
         else{
 
+
             Edge edge = edgeEvent.getEdge();
 
             ((TwoPTwoPGraph) dataSet).removeEdge(edge);
+
         }
 
         return removeEvent;

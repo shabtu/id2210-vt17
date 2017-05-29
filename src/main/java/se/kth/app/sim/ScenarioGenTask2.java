@@ -104,7 +104,39 @@ public class ScenarioGenTask2 {
                 selfAdr = ScenarioSetup.getNodeAdr(selfIp,0);
 
                 String targetIp = "193.0.0.2";
-                target = ScenarioSetup.getNodeAdr(targetIp, integer);
+                target = ScenarioSetup.getNodeAdr(targetIp, 2);
+            }
+            return new StartNodeEvent() {
+                @Override
+                public KAddress getNodeAddress() {
+                    return selfAdr;
+                }
+
+                @Override
+                public Class getComponentDefinition() {
+                    return TestComponentTask2.class;
+                }
+
+                @Override
+                public TestComponentTask2.Init getComponentInit() {
+                    return new TestComponentTask2.Init(selfAdr, target, integer);
+                }
+            };
+        }
+    };
+
+    static Operation1<StartNodeEvent, Integer> testOpConcurrent = new Operation1<StartNodeEvent, Integer>() {
+        @Override
+        public StartNodeEvent generate(final Integer integer) {
+            final KAddress selfAdr;
+            final KAddress target;
+
+            {
+                String selfIp = "193.0.0.0";
+                selfAdr = ScenarioSetup.getNodeAdr(selfIp,0);
+
+                String targetIp = "193.0.0.1";
+                target = ScenarioSetup.getNodeAdr(targetIp, 1);
             }
             return new StartNodeEvent() {
                 @Override
@@ -173,7 +205,7 @@ public class ScenarioGenTask2 {
 
                 @Override
                 public HostMngrComp.Init getComponentInit() {
-                    return new HostMngrComp.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId, TwoPTwoPGraph.class.getName());
+                    return new HostMngrComp.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId, GSet.class.getName());
                 }
 
                 @Override
@@ -220,37 +252,23 @@ public class ScenarioGenTask2 {
                     }
                 };
 
-                StochasticProcess startPeersToKill = new StochasticProcess() {
-                    {
-                        eventInterArrivalTime(uniform(1000, 1100));
-                        raise(3, startNodeOp, new BasicIntSequentialDistribution(4));
-                    }
-                };
-
-                final StochasticProcess reviveNode = new StochasticProcess() {
-                    {
-                        eventInterArrivalTime(uniform(1000, 1100));
-                        raise(1, startNodeOp, new BasicIntSequentialDistribution(5));
-                    }
-                };
-
-                StochasticProcess startTest = new StochasticProcess() {
-                    {
-                        eventInterArrivalTime(constant(1000));
-                        raise(1, testOp, new IntegerUniformDistribution(1,3, new Random(seed2)));
-                    }
-                };
-
                 StochasticProcess startTestSET = new StochasticProcess() {
                     {
                         eventInterArrivalTime(constant(5000));
-                        raise(4, testOp, new BasicIntSequentialDistribution(1));
+                        raise(2, testOp, new BasicIntSequentialDistribution(1));
                     }
                 };
-                StochasticProcess startTestSETagain = new StochasticProcess() {
+                StochasticProcess startTestConcurrent1 = new StochasticProcess() {
                     {
                         eventInterArrivalTime(constant(1000));
-                        raise(1, testOp, new BasicIntSequentialDistribution(1));
+                        raise(1, testOp, new BasicIntSequentialDistribution(3));
+                    }
+                };
+
+                StochasticProcess startTestConcurrent2 = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(constant(1000));
+                        raise(1, testOpConcurrent, new BasicIntSequentialDistribution(4));
                     }
                 };
 
@@ -268,9 +286,11 @@ public class ScenarioGenTask2 {
 
                 /**Neeed to test the ORSET**/
                 startTestSET.startAfterTerminationOf(1000, startPeers);
+                //startTestConcurrent1.startAfterTerminationOf(1000, startTestSET);
+                //startTestConcurrent2.startAfterTerminationOf(1000, startTestSET);
 
 
-                terminateAfterTerminationOf(10000*100000, startTestSET);
+                terminateAfterTerminationOf(1000*1000, startTestSET);
             }
         };
 

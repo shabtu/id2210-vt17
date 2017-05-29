@@ -18,7 +18,6 @@ public class ORSet extends SuperSet {
         this.dataSet = new HashMap<>();
     }
 
-
     public void updateAdd(Object element){
 
         OREvent orEvent = (OREvent) element;
@@ -67,10 +66,7 @@ public class ORSet extends SuperSet {
         Set<UUID> tempOrEvent = orEvent.getSet();
         Set<UUID> tempORSet = dataSet.get(orEvent.getElement());
         Set<UUID> newSet = new HashSet<>();
-
-        System.out.println("I ORSET " + tempOrEvent + " and " + tempORSet);
-
-        if (!tempOrEvent.isEmpty() && !tempORSet.isEmpty()){
+        if (tempOrEvent != null  && tempORSet != null){
 
             /**Should only remove those entries that does match, does that has been delivered, causal
              * tells that you can not remove something that has not been delivered**/

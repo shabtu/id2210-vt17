@@ -70,14 +70,14 @@ public class TestComponentTask2 extends ComponentDefinition {
             //testTwoPSet();
 
             /**Test for GSET**/
-            //sendGSet();
+            sendGSet();
 
 
             /**Test for ORSET**/
             //testORSet();
 
             /**Test for 2P2PGraph**/
-            testGraph();
+            //testGraph();
 
         }
 
@@ -85,7 +85,6 @@ public class TestComponentTask2 extends ComponentDefinition {
 
     private void testGraph() {
 
-        System.out.println("TEST IS " + test);
         switch (test) {
             case 1:
                 sendAddVertex();
@@ -97,13 +96,28 @@ public class TestComponentTask2 extends ComponentDefinition {
                 removeVertex();
                 break;
             case 4:
-                removeEdge();
+                //removeEdge();
+                sendEdge2();
                 break;
+
+                default:
+                    System.out.println("Nothing found");
         }
     }
 
+    private void sendEdge2() {
+
+        EdgeEvent edgeEvent = new EdgeEvent(true, 1, 2);
+
+        AddEvent addEvent = new AddEvent(edgeEvent);
+
+        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+        KContentMsg contentMsg = new BasicContentMsg(header, addEvent);
+        trigger(contentMsg, networkPort);
+
+    }
+
     private void removeEdge() {
-        System.out.println("görs dsdosapjdpaosdja");
         EdgeEvent edgeEvent = new EdgeEvent(true, 0, 1);
 
         RemoveEvent removeEvent = new RemoveEvent(edgeEvent);
@@ -115,7 +129,7 @@ public class TestComponentTask2 extends ComponentDefinition {
 
     private void removeVertex() {
 
-        VertexEvent vertexEvent = new VertexEvent(true, 2);
+        VertexEvent vertexEvent = new VertexEvent(true, 1);
 
         RemoveEvent removeEvent = new RemoveEvent(vertexEvent);
 
@@ -161,7 +175,39 @@ public class TestComponentTask2 extends ComponentDefinition {
             case 2:
                 sendORRemoveSet();
                 break;
+            case 3:
+                sendORAdd();
+                break;
+            case 4:
+                sendORRemove();
+                break;
+                default:
+                    System.out.println("no matching");
         }
+    }
+
+    private void sendORRemove() {
+        OREvent orEvent = new OREvent("Apa0", null);
+
+        RemoveEvent removeEvent = new RemoveEvent(orEvent);
+
+        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+        KContentMsg contentMsg = new BasicContentMsg(header, removeEvent);
+
+        trigger(contentMsg, networkPort);
+
+    }
+
+
+    private void sendORAdd() {
+        OREvent orEvent = new OREvent("Apa0", null);
+
+        AddEvent addEvent = new AddEvent(orEvent);
+
+        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
+        KContentMsg contentMsg = new BasicContentMsg(header, addEvent);
+
+        trigger(contentMsg, networkPort);
     }
 
 
@@ -174,15 +220,6 @@ public class TestComponentTask2 extends ComponentDefinition {
                 sendTwoPSet();
                 break;
         }
-    }
-
-    private void sendRemoveEvent() {
-
-        RemoveEvent removeEvent = new RemoveEvent("remove");
-
-        KHeader header = new BasicHeader(selfAdr, target, Transport.UDP);
-        KContentMsg contentMsg = new BasicContentMsg(header, removeEvent);
-        trigger(contentMsg, networkPort);
     }
 
     private void sendGSet() {

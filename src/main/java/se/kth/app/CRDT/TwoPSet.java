@@ -46,11 +46,10 @@ public class TwoPSet extends SuperSet{
 
     public boolean lookUp(Object object){
 
+
         if (object instanceof Edge){
 
             Edge edge = (Edge) object;
-
-            System.out.println("hit i twopset "+ edge);
 
             if(store.contains(edge) && !tombstone.contains(edge)){
                 return true;
